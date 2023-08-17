@@ -29,6 +29,10 @@ export const YoutubeVideoComponent = ({
     }
   };
 
+  useEffect(() => {
+    setChats([]);
+  }, [selected]);
+
   const handleSearch = async (val) => {
     if (loading) return;
     const searchValue = val || search.trim();
@@ -175,11 +179,11 @@ export const YoutubeVideoComponent = ({
                   <>
                     <div
                       onClick={() => {
-                        handleSearch("What is Kurzgesagt?");
+                        handleSearch("What are blackholes?");
                       }}
                       className="rounded-md flex px-[6px] text-center justify-center py-[8px] w-full max-w-[500px] border border-gray-700 cursor-pointer"
                     >
-                      <div>What is Kurzgesagt?</div>
+                      <div>what are blackholes?</div>
                     </div>
                     <div
                       onClick={() => {
@@ -212,8 +216,8 @@ export const YoutubeVideoComponent = ({
                   children={
                     (answer !== "" && index === chats.length - 1
                       ? answer
-                      : chat?.msg?.includes("[DISCLAIMER]")
-                      ? chat?.msg?.replace("[DISCLAIMER]", "")
+                      : chat?.msg?.includes?.("[DISCLAIMER]")
+                      ? chat?.msg?.replace?.("[DISCLAIMER]", "")
                       : chat?.msg
                     )?.split("+Sources+")[0]
                   }
@@ -227,6 +231,12 @@ export const YoutubeVideoComponent = ({
         </div>
         <Input
           value={search}
+          // on enter
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSearch(search);
+            }
+          }}
           onChange={(e) => {
             setSearch(e.target.value);
           }}
