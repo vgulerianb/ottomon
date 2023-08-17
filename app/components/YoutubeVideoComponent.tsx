@@ -147,7 +147,12 @@ export const YoutubeVideoComponent = ({
           {chats?.length === 0 ? (
             <>
               <div className="flex flex-col m-auto w-full items-center gap-[8px] text-center">
-                <div>Ask questions related to Buildspace</div>
+                <div>
+                  Ask questions related to{" "}
+                  {selected === "website"
+                    ? "Buildspace"
+                    : "Kurzgesagt youtube videos"}
+                </div>
                 {selected === "website" ? (
                   <>
                     <div
