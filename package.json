@@ -1,0 +1,44 @@
+{
+  "name": "crucible",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.0.0",
+    "@supabase/supabase-js": "^2.26.0",
+    "@types/node": "20.4.3",
+    "@types/react": "18.2.15",
+    "@types/react-dom": "18.2.7",
+    "ai": "^2.2.1",
+    "autoprefixer": "10.4.14",
+    "axios": "^1.4.0",
+    "eslint": "8.45.0",
+    "eslint-config-next": "13.4.12",
+    "gpt-tokenizer": "^2.1.1",
+    "next": "13.4.12",
+    "openai-edge": "^1.2.1",
+    "postcss": "8.4.27",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-markdown": "^8.0.7",
+    "react-syntax-highlighter": "^15.5.0",
+    "rehype-raw": "^6.1.1",
+    "remark-gfm": "^3.0.1",
+    "supabase": "^1.77.9",
+    "tailwindcss": "3.3.3",
+    "typescript": "5.1.6",
+    "uuid": "^9.0.0",
+    "youtube-captions-scraper": "^2.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.0.0"
+  }
+}
