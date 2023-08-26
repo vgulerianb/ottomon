@@ -33,8 +33,8 @@ export default function Home() {
         </div>
       </div>
       <Script src="/particles.js" />
-      <div className="w-full flex items-center flex-col transition-all">
-        <div className="relative font-inter antialiased w-full">
+      <div className="w-full flex items-center flex-col transition-all h-full">
+        <div className="relative font-inter antialiased w-full h-fit">
           <main className="relative min-h-screen flex flex-col justify-center bg-[#131313] overflow-hidden">
             <div className="w-full max-w-6xl mx-auto px-4 md:px-6 py-24">
               <div className="text-center">
@@ -92,6 +92,8 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
+                <div className="mt-[60px] text-4xl">Examples</div>
+                <BotBoddy />
               </div>
             </div>
           </main>
@@ -100,3 +102,41 @@ export default function Home() {
     </div>
   );
 }
+
+const BotBoddy = () => {
+  return (
+    <div className="bg-[#1b1b1b] shadow-sm flex flex-col text-start z-[1000] w-full max-w-[700px] mx-auto relative border-[rgba(40,40,40,.9)] rounded-md border">
+      <div className="w-full border-b p-[8px] flex items-center border-[rgba(40,40,40)]">
+        <input
+          className="w-full h-full bg-transparent outline-none text-white placeholder-gray-500/80"
+          placeholder="Ask me something"
+        />
+        <button
+          disabled
+          className="bg-[rgb(133,89,244)] text-sm px-[8px] rounded-md"
+        >
+          Ask
+        </button>
+      </div>
+      <div className="p-[8px]">
+        <span className="leading-[20px] font-[400] text-[rgb(112,112,112)] text-[14px]">
+          Quickstarts
+        </span>
+        <div className="flex flex-col gap-[4px] max-h-[400px]">
+          <div className="flex gap-[8px] p-[8px] hover:bg-[#323232] cursor-pointer rounded-md text-sm">
+            <span>{`->`}</span>
+            How do I get started with Supabase?
+          </div>
+          <div className="flex gap-[8px] p-[8px] hover:bg-[#323232] cursor-pointer rounded-md text-sm">
+            <span>{`->`}</span>
+            How do I get started with Supabase?
+          </div>
+          <div className="flex gap-[8px] p-[8px] hover:bg-[#323232] cursor-pointer rounded-md text-sm">
+            <span>{`->`}</span>
+            How do I get started with Supabase?
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
