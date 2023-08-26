@@ -3,21 +3,7 @@ import { StreamingTextResponse } from "ai";
 export async function POST(req: Request) {
   const request = await req.json();
   const { prompt, projectId, sessionId } = request;
-  // if (projectId === "git-1782") {
-  //   // fetch POST https://api.mendable.ai/component/chat {"question":"What are the different types of modules available in the codebase?","history":[],"component_version":"0.0.151","anon_key":"a2b5e9f3-74f0-4810-97f2-fa10fc053cc7","conversation_id":920050}
-  //   const response = await fetch(`https://api.mendable.ai/component/chat`, {
-  //     method: "POST",
-  //     body: JSON.stringify({
-  //       question: prompt,
-  //       history: [],
-  //       component_version: "0.0.151",
-  //       anon_key: "a2b5e9f3-74f0-4810-97f2-fa10fc053cc7",
-  //       conversation_id: 920050,
-  //     }),
-  //   });
-  //   return new StreamingTextResponse(response.body);
-  // }
-  const response = (await fetch(`http://34.93.236.239/api/askdocnavigator`, {
+  const response = (await fetch(`https://docnavigator.in/api/askdocnavigator`, {
     method: "POST",
     body: JSON.stringify({
       projectId:

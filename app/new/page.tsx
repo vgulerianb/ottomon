@@ -10,7 +10,7 @@ export default function Home() {
         <div className="flex items-center">
           <Image src="/logo.png" width={32} height={32} alt="ottomon" />
         </div>
-        <div className="flex gap-[8px] items-center">
+        <div className="flex gap-[16px] items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="1.5em"
@@ -87,7 +87,7 @@ export default function Home() {
                       className="h-[50px] w-full rounded-md bg-[rgba(89,89,89,0.6)] p-[8px] outline-none"
                       placeholder="Your Email Address"
                     />
-                    <button className="h-[50px] rounded-md text-sm font-medium whitespace-nowrap p-[8px] outline-none text-black bg-white">
+                    <button className="h-[50px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white">
                       Join Waitlist
                     </button>
                   </div>
