@@ -21,6 +21,24 @@ const Faqs = {
 };
 
 export default function Home() {
+  const [Email, setEmail] = useState<string>("");
+
+  const handleSubmit = async () => {
+    // regex for email
+    if (!Email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+    await axios
+      .post("/api/waitlist", {
+        email: Email,
+      })
+      .then(() => {
+        setEmail("");
+        alert("You've been added to the waitlist!");
+      });
+  };
+
   return (
     <div className="w-screen h-screen flex justify-center items-center">
       <div className="fixed top-0 flex items-center w-full z-50 p-[16px] max-w-[800px] justify-between">
@@ -44,9 +62,9 @@ export default function Home() {
               d="M23 3.01s-2.018 1.192-3.14 1.53a4.48 4.48 0 00-7.86 3v1a10.66 10.66 0 01-9-4.53s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5 0-.278-.028-.556-.08-.83C21.94 5.674 23 3.01 23 3.01z"
             ></path>
           </svg>
-          <button className="h-[36px] rounded-md text-sm font-medium whitespace-nowrap p-[8px] outline-none text-black bg-white">
+          {/* <button className="h-[36px] rounded-md text-sm font-medium whitespace-nowrap p-[8px] outline-none text-black bg-white">
             Sign In
-          </button>
+          </button> */}
         </div>
       </div>
       <Script src="/particles.js" />
@@ -101,10 +119,15 @@ export default function Home() {
                   </div>
                   <div className="flex gap-[8px] max-w-[500px] items-center ">
                     <input
+                      value={Email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="h-[50px] w-full rounded-md bg-[rgba(89,89,89,0.6)] p-[8px] outline-none"
                       placeholder="Your Email Address"
                     />
-                    <button className="h-[50px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white">
+                    <button
+                      onClick={handleSubmit}
+                      className="h-[50px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
+                    >
                       Join Waitlist
                     </button>
                   </div>

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "excel-327916",
+  "private_key_id": "0099f6ba7ee59501170cf6d9d571a8836a70adfe",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC2Lt7LhpFujsrH\nNn0Hi41gp/sWh10c9ZMRwG2UrLA5Z8TChnq2OJbnQyLRY0bu1lEpm57hAXiczlI4\nwPiahh7Tnc8VAVG7MV5FNc9bwXQ4CrTwy5SbCYj05YWr8kWmXg1W3pvSAlRfeW7C\nLw/5qDtXxySLK0k+y940LK+jgmS1nz/g94Sx87Cskk/LETzU1a/cuDUKmoyPt0Az\nQT/DWKhZl2m19Js/YhhjfEW99a4rqLTfgiNjx2e9XiDqvrwT7C3ZwfyLU4QdPSPC\nu0hMdJt1v8UnOB4bMNg3Z5N+axAFXhGja67hGe+Fi1OWDVBgAXV/ij9rZx3j9Nb3\nPSBL/wv9AgMBAAECggEAOpaQJ7u7AWcCZ1ZqlwaWDMN4yCH4G9wN0+OiWfG/Knbo\nm/ZLeFZykSTSCax3n09lApB9Y7bpZuQjJQVJ7ce8Ginh8std0Wlq+672ZHeuPGeV\nEOsne0RxuvAlMMrVA0+z0n/8dGkzYRDYQbKI3KzxiKUOZ4MgJwXBC95jDZ5dbNqi\n7HVvTAtFHFBEQZYIaPMMmXoNJHJxo8rg6xU/fJ/yrR/LzFz9Pp4NYkl9DCcy1GJU\nKpRAQoSZ3jytbCP345CrJXzu0J7bBK9Dj3Yw2YJpYp/A3jseQH1bmVtIJYl+PwFs\nOIBxxmTRLEM1/kuci9m6BcEKb0mIom0oR9NHVTX0MQKBgQDcyri//sLe9uru9nFV\nCQ6xZz7XrT8BLs6Hr+M4sInt8cQ2Z01Ab5xE522FjU3MipUz3HA1D13Yly3sMrXm\n/JtpKINaCQLDzyV0FBaku4Fea1JftYWGUWozS45l9z3iYSEiSRIc83E01SGBqdsU\nRxT0lq2qBvvC9RIBo2sleWW5ywKBgQDTPApxsm5EO2UAtG7PLNvd/ztiujXp2e5A\nPSJVLVem9UcRJjh2OAwIcHWRI4jY44ch0iOIgh8ScV5d6PGbnpKFW8fjAzGpFiRp\nr2YzuYdLKqy1yAkFjIN/SF6skhajEWo6AZ+m7oCNyFAjoEkJIxlsRE/gQmjUZhgy\nTylMlkm4VwKBgDVeJtP5n17Hbjf+h5xXSR7mZtE5Bg6iIre3cwPD4EMMejHwPEMD\n91DMY7OxWQnEwZW8hb69jSCKQkZiZ4eCrYn4ie9cWDe+PT5WkLaWwAlzhYCu3qx9\nx17It427+lBay+h+owsuaMGtdqDhzpuTJuSL+0Qq1fXkyMpulrqDImyLAoGBALlO\nwcbOhodbJ5c/sroTG2scHmfU/bkCE03Nk9HvbiaspES6J+wl7QB2T90ctE+5AvI7\nnCqEJGgUhnmSAmrH6LgPNULEqYsxPo5sbhdQWg0qCcuLCccRZsaBoXR40F0LyQnM\nJNfYAXTgVtV6JrhaT1I4d25ANCCo0+9GnO9wJIoPAoGBALCGMIbOyKiUoXG7ECo0\nEZEaiZzo+adV5SouJZI6GoO5U1h+nQ39Rgr/17DOUfbuHlYt1xaeQ2S/SN7iMlZo\nia/XEotTyEBOEKpWWi9frJjepyTeehMZb1YDtwpYicoxKU0BnJ6HckNzJWnAxtGT\nrIScNlaZb7c7fOZsV4QFriAe\n-----END PRIVATE KEY-----\n",
+  "client_email": "ottomon-temp@excel-327916.iam.gserviceaccount.com",
+  "client_id": "116971906806806895223",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ottomon-temp%40excel-327916.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

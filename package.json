@@ -22,6 +22,7 @@
     "axios": "^1.4.0",
     "eslint": "8.45.0",
     "eslint-config-next": "13.4.12",
+    "googleapis": "^126.0.1",
     "gpt-tokenizer": "^2.1.1",
     "next": "13.4.12",
     "openai-edge": "^1.2.1",
