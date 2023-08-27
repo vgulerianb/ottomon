@@ -184,11 +184,15 @@ export const YoutubeVideoComponent = ({
                   <>
                     <div
                       onClick={() => {
-                        handleSearch("What are blackholes?");
+                        handleSearch(
+                          "What role do black holes play in powering quasars?"
+                        );
                       }}
                       className="rounded-md flex px-[6px] text-center justify-center py-[8px] w-full max-w-[500px] border border-gray-700 cursor-pointer"
                     >
-                      <div>what are blackholes?</div>
+                      <div>
+                        What role do black holes play in powering quasars?
+                      </div>
                     </div>
                     <div
                       onClick={() => {
@@ -351,7 +355,7 @@ const Input = (
   );
 };
 
-const RenderCode = ({ children }: { children: any }) => {
+export const RenderCode = ({ children }: { children: any }) => {
   return (
     <pre className="p-[8px]">
       {children?.map((child: any, key: number) => {
