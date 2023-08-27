@@ -104,3 +104,11 @@ blockquote {
   font-size: 12px;
   font-weight: 500;
 }
+
+.card button {
+  display: none;
+}
+
+:hover .buildspacecard button {
+  display: block !important;
+}

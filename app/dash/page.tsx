@@ -1,13 +1,10 @@
 "use client";
-
-import Script from "next/script";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { RenderCode } from "./components/YoutubeVideoComponent";
+import { RenderCode } from "../components/YoutubeVideoComponent";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 const Faqs = {
   buildspace: [
@@ -24,7 +21,10 @@ const Faqs = {
 
 export default function Home() {
   const [Email, setEmail] = useState<string>("");
-  const router = useRouter();
+  const [created, setCreated] = useState<boolean>(false);
+  const [addModal, setAddModal] = useState<boolean>(false);
+  const [website, setWebsite] = useState<string>("Submit");
+  const [botActive, setBotActive] = useState<boolean>(false);
 
   const handleSubmit = async () => {
     // regex for email
@@ -42,9 +42,72 @@ export default function Home() {
       });
   };
 
+  const startTimer = () => {
+    // change website to Submitting... after 3 second Genrating FAQs
+    setWebsite("Submitting...");
+    setTimeout(() => {
+      // change website to Submit after 3 second Genrating FAQs
+      setWebsite("Generating FAQs...");
+      // setCreated(true);
+      // setAddModal(false);
+      setTimeout(() => {
+        // change website to Submit after 3 second Genrating FAQs
+        setWebsite("Generated!");
+        setCreated(true);
+        setAddModal(false);
+      }, 1000);
+    }, 2000);
+  };
+
   return (
     <div className="w-screen h-screen flex justify-center items-center">
-      <div className="fixed top-0 flex items-center w-full z-50 p-[16px] max-w-[800px] justify-between">
+      {addModal ? (
+        <>
+          <div className="w-screen h-screen fixed top-0 left-0 bg-black/40 z-[1000] flex justify-center items-center">
+            <div className="w-[700px] bg-black flex flex-col relative z-[1000] rounded-md border border-gray-700">
+              <div className="p-[8px] text-white border-b border-gray-700">
+                New Project
+              </div>
+              <div className="p-[16px] text-white border-b border-gray-700 flex flex-col">
+                <input
+                  placeholder="Project Name"
+                  className="text-white/70 outline-none w-full border-gray-700 border p-[4px] bg-black text-xs rounded-md"
+                />
+                <span className="text-xs text-white/80 mt-[16px]">
+                  Bot Type
+                </span>
+                <div className="flex gap-[16px]">
+                  <div className="py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border border-white cursor-pointer">
+                    <img src="/web.png" width={32} height={32} alt="ottomon" />
+                    <span className="text-white/70 text-sm">Website</span>
+                  </div>
+                  <div className="py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border border-gray-700 cursor-pointer">
+                    <img src="/you.png" width={32} height={32} alt="ottomon" />
+                    <span className="text-white/70 text-sm">Youtube</span>
+                  </div>
+                </div>
+                <span className="text-xs text-white/80 mt-[16px]">Website</span>
+                <input
+                  placeholder="https://ottomon.in"
+                  className="text-white/70 mt-[4px] outline-none w-full border-gray-700 border p-[4px] bg-black text-xs h-[32px] rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    startTimer();
+                  }}
+                  className={`mt-[16px] w-full text-white h-[40px] bg-gradient-to-br ${"from-purple-600 to-blue-500"}  hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm flex  items-center justify-center text-center mr-2 mb-2`}
+                >
+                  {website}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        ""
+      )}
+      <div className="fixed top-0 flex items-center w-full z-50 p-[16px] max-w-[1200px] justify-between">
         <div className="flex items-center">
           <Image src="/logo.png" width={32} height={32} alt="ottomon" />
         </div>
@@ -53,7 +116,7 @@ export default function Home() {
           target="_blank"
           href="https://x.com/vguleria19"
         >
-          <svg
+          {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             height="1.5em"
             fill="none"
@@ -68,22 +131,16 @@ export default function Home() {
               strokeLinejoin="round"
               d="M23 3.01s-2.018 1.192-3.14 1.53a4.48 4.48 0 00-7.86 3v1a10.66 10.66 0 01-9-4.53s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5 0-.278-.028-.556-.08-.83C21.94 5.674 23 3.01 23 3.01z"
             ></path>
-          </svg>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              router.push("/dash");
-            }}
-            className="h-[36px] rounded-md text-sm font-medium whitespace-nowrap p-[8px] outline-none text-black bg-white"
-          >
-            Dashboard
-          </button>
+          </svg> */}
+          <div className="bg-red-800 rounded-full w-[32px] h-[32px] flex justify-center text-sm items-center text-white">
+            V
+          </div>
         </Link>
       </div>
-      <Script src="/particles.js" />
+      {/* <Script src="/particles.js" /> */}
       <div className="w-full flex items-center flex-col transition-all h-full">
         <div className="relative font-inter antialiased w-full h-fit">
-          <main className="relative min-h-screen flex flex-col justify-center bg-[#131313] overflow-hidden">
+          <main className="relative min-h-screen flex flex-col bg-[#131313] overflow-hidden">
             <div className="w-full max-w-6xl mx-auto px-4 md:px-6 py-24">
               <div className="text-center">
                 {/* Illustration #1 */}
@@ -120,33 +177,93 @@ export default function Home() {
                   <canvas data-particle-animation="" />
                 </div>
                 <div className="relative flex flex-col items-center">
-                  <h1 className="max-w-[550px] inline-flex font-extrabold text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-slate-200 via-slate-200 to-slate-200/60 pb-4">
-                    Chat with code, videos, and docs
-                  </h1>
-                  <div className="max-w-3xl mx-auto mb-8">
-                    <p className="text-lg text-slate-400">
-                      Elevate your data apps with seamless, production-ready
-                      chat integration. Effortlessly ingest, personalize, and
-                      deploy using just a single line of code.
-                    </p>
-                  </div>
-                  <div className="flex gap-[8px] max-w-[500px] items-center ">
+                  <div className="flex gap-[8px] max-w-[1200px] w-full items-center ">
                     <input
                       value={Email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-[50px] w-full rounded-md bg-[rgba(89,89,89,0.6)] p-[8px] outline-none"
-                      placeholder="Your Email Address"
+                      className="h-[32px] w-full rounded-md bg-[rgba(89,89,89,0.6)] p-[8px] outline-none"
+                      placeholder="Search projects"
                     />
                     <button
-                      onClick={handleSubmit}
-                      className="h-[50px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
+                      onClick={() => {
+                        setAddModal(true);
+                      }}
+                      className="h-[32px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
                     >
-                      Join Waitlist
+                      Add New
                     </button>
                   </div>
+                  <div className="flex gap-[16px] items-center justify-start w-full mt-[32px]">
+                    {created ? (
+                      <div
+                        onClick={() => {
+                          setBotActive(true);
+                        }}
+                        className=" p-[16px] rounded-md border border-gray-700 hover:border-white cursor-pointer bg-black"
+                      >
+                        <div className="flex gap-[8px] items-center ">
+                          <img
+                            src="/web.png"
+                            alt="ottomon"
+                            className="h-[28px] w-[28px] grayscale"
+                          />
+                          <div className="flex flex-col text-left">
+                            <span className="text-white text-sm font-semibold">
+                              Buildspace
+                            </span>
+                            <span className="text-white/70 text-sm">
+                              Bot for buildspace website
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full buildspacecard text-left text-white/70 mt-[30px] flex justify-between">
+                          <span className="text-xs font-semibold ">
+                            Created by <span>Vikrant</span>
+                          </span>
+                          {/* <button className="bg-[rgb(133,89,244)] text-white  text-sm px-[8px] rounded-md">
+                          Try me
+                        </button> */}
+                        </div>
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                    <div className=" p-[16px] rounded-md border border-gray-700 hover:border-white cursor-pointer bg-black">
+                      <div className="flex gap-[8px] items-center ">
+                        <img
+                          src="/you.png"
+                          alt="ottomon"
+                          className="h-[28px] w-[28px] grayscale"
+                        />
+                        <div className="flex flex-col text-left">
+                          <span className="text-white text-sm font-semibold">
+                            Kurzgesagt
+                          </span>
+                          <span className="text-white/70 text-sm">
+                            Bot for Kurzgesagt youtube
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-full buildspacecard text-left text-white/70 mt-[30px] flex justify-between">
+                        <span className="text-xs font-semibold ">
+                          Created by <span>Vikrant</span>
+                        </span>
+                        {/* <button className="bg-[rgb(133,89,244)] text-white  text-sm px-[8px] rounded-md">
+                          Try me
+                        </button> */}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-[60px] text-3xl">Examples</div>
-                <BotBoddy />
+                {botActive ? (
+                  <BotBoddy
+                    onClose={() => {
+                      setBotActive(false);
+                    }}
+                  />
+                ) : (
+                  ""
+                )}
               </div>
             </div>
           </main>
@@ -156,7 +273,7 @@ export default function Home() {
   );
 }
 
-const BotBoddy = () => {
+const BotBoddy = ({ onClose }: { onClose: () => void }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [answer, setAnswer] = useState<string>("");
   const [chats, setChats] = useState<any[]>([]);
@@ -233,30 +350,16 @@ const BotBoddy = () => {
   }, [answer, loading]);
 
   return (
-    <>
-      <div className="flex gap-[8px] items-center justify-center my-[16px]">
-        <div
-          onClick={() => setSelected("buildspace")}
-          className={`${
-            selected === "buildspace"
-              ? "bg-gray-600 text-white"
-              : "text-gray-400"
-          } cursor-pointer p-[4px] rounded-md w-[150px] border border-gray-700`}
-        >
-          Buildspace
-        </div>
-        <div
-          onClick={() => setSelected("kurzgesagt")}
-          className={`${
-            selected === "kurzgesagt"
-              ? "bg-gray-600 text-white"
-              : "text-gray-400"
-          } cursor-pointer p-[4px] rounded-md w-[150px] border border-gray-700`}
-        >
-          Kurzgesagt
-        </div>
-      </div>
-      <div className="bg-[#1b1b1b] shadow-sm flex flex-col text-start z-[1000] w-full max-w-[700px] mx-auto relative border-[rgba(40,40,40,.9)] rounded-md border">
+    <div
+      onClick={onClose}
+      className="fixed bg-black/40 w-screen h-screen top-0 left-0 flex justify-center items-center"
+    >
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        className="bg-[#1b1b1b] shadow-sm flex flex-col text-start z-[1000] w-full max-w-[700px] mx-auto relative border-[rgba(40,40,40,.9)] rounded-md border"
+      >
         {!chats?.length ? (
           <div className="w-full border-b p-[8px] flex items-center border-[rgba(40,40,40)]">
             <input
@@ -498,6 +601,6 @@ const BotBoddy = () => {
           ""
         )}
       </div>
-    </>
+    </div>
   );
 };
