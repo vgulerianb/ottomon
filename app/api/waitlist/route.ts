@@ -1,7 +1,9 @@
+import path from "path";
+
 const { google } = require("googleapis");
 const authentication = async () => {
   const auth = new google.auth.GoogleAuth({
-    keyFile: "excelConfig.json",
+    keyFile: path.join(process.cwd(), "excelConfig.json"),
     scopes: "https://www.googleapis.com/auth/spreadsheets",
   });
 
