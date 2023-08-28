@@ -16,6 +16,7 @@ const authentication = async () => {
 export async function POST(req: Request) {
   const request = await req.json();
   const { email } = request;
+  console.log({ email });
   let sheetId = "1Z5R2Re0-_bapzzc1v6WrRR6ABorjkJRAC4nhiNi9TlY";
   const { sheets } = await authentication();
   const writeReq = await sheets.spreadsheets.values.append({
