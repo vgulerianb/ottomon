@@ -1,4 +1,4 @@
-export const runtime = "edge";
+const ytpl = require("ytpl");
 
 export async function GET(req: Request) {
   const url = "https://github.com/vgulerianb/crucible";
@@ -9,7 +9,22 @@ export async function GET(req: Request) {
     .catch((error) => {
       console.error("Error:", error.message);
     });
+  const youtubeUrl = "https://www.youtube.com/channel/UCfTsUr9gnLKeY8ptVpWZdhQ";
+  const playlist = await ytpl(youtubeUrl);
 
+  const formattedPlaylist = [
+    {
+      loc: "",
+      path: youtubeUrl,
+      content: `Title of this channel is ${playlist?.title}. Description of this channel is ${playlist?.description}`,
+    },
+    ...playlist?.items?.map((item) => ({
+      loc: item?.title,
+      path: item.shortUrl,
+      content: "",
+    })),
+  ];
+  console.log({ formattedPlaylist });
   return new Response("Something went wrong");
 }
 
@@ -40,6 +55,7 @@ async function getGitHubRepoFiles(githubUrl) {
             return {
               loc: item?.download_url,
               path: item.path,
+              content: "",
             };
           });
         for (const subfolder of subfolders) {
