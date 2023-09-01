@@ -88,12 +88,12 @@ async function getGitHubRepoFiles(githubUrl) {
         }
         return files;
       } else {
-        throw new Error(`GitHub API returned status code ${response.status}`);
+        // throw new Error(`GitHub API returned status code ${response.status}`);
         return [];
       }
     } catch (error) {
       console.log({ error });
-      throw new Error(`Error fetching folder contents: ${error.message}`);
+      //   throw new Error(`Error fetching folder contents: ${error.message}`);
       return [];
     }
   }
