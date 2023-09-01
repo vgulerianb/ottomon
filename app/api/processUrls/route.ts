@@ -1,16 +1,17 @@
+import { NextResponse } from "next/server";
+import { getSubtitles } from "youtube-captions-scraper";
 const ytpl = require("ytpl");
 
 export async function GET(req: Request) {
-  const url = "https://github.com/vgulerianb/crucible";
-  getGitHubRepoFiles(url)
-    .then((files) => {
-      console.log("Files in the GitHub repository:", files);
-    })
-    .catch((error) => {
-      console.error("Error:", error.message);
-    });
-  const youtubeUrl = "https://www.youtube.com/channel/UCfTsUr9gnLKeY8ptVpWZdhQ";
-  const playlist = await ytpl(youtubeUrl);
+  const hostUrl = new URL(req.url);
+  const withContent = hostUrl.searchParams.get("withContent") || false;
+  const url = "https://github.com/langchain-ai/langchain";
+  const files = await getGitHubRepoFiles(url);
+
+  const youtubeUrl = "https://www.youtube.com/channel/UCMiJRAwDNSNzuYeN2uWa0pA";
+  const playlist = await ytpl(youtubeUrl, {
+    limit: 50,
+  });
 
   const formattedPlaylist = [
     {
@@ -24,8 +25,26 @@ export async function GET(req: Request) {
       content: "",
     })),
   ];
-  console.log({ formattedPlaylist });
-  return new Response("Something went wrong");
+
+  if (withContent) {
+    for (let i = 0; i < formattedPlaylist?.length; i++) {
+      const item = formattedPlaylist[i];
+      const videoID = new URL(item?.path).searchParams.get("v");
+      if (!videoID) continue;
+      let content = await getSubtitles({
+        videoID: videoID,
+        lang: "en",
+      });
+      content = content.map((c: any) => c.text).join(" ");
+      formattedPlaylist[i] = { ...item, content };
+    }
+  }
+
+  console.log({ formattedPlaylist: formattedPlaylist?.length });
+  return NextResponse.json({
+    formattedPlaylist,
+    files,
+  });
 }
 
 async function getGitHubRepoFiles(githubUrl) {
@@ -37,6 +56,9 @@ async function getGitHubRepoFiles(githubUrl) {
   async function fetchFilesInFolder(folderPath) {
     try {
       // Fetch the contents of a specific folder using the GitHub API.
+      console.log(
+        `https://api.github.com/repos/${owner}/${repo}/contents/${folderPath}`
+      );
       const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/contents/${folderPath}`
       );
@@ -67,9 +89,12 @@ async function getGitHubRepoFiles(githubUrl) {
         return files;
       } else {
         throw new Error(`GitHub API returned status code ${response.status}`);
+        return [];
       }
     } catch (error) {
+      console.log({ error });
       throw new Error(`Error fetching folder contents: ${error.message}`);
+      return [];
     }
   }
 
