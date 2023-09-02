@@ -4,6 +4,7 @@ import { prisma } from "@/prisma/db";
 const handler = async (req, res) => {
   const queryParams = req.query;
   const type = queryParams.type;
+  const order = queryParams.order;
   const urls = await prisma.taskqueue.findMany({
     where: {
       // content is not ""
@@ -12,10 +13,14 @@ const handler = async (req, res) => {
       },
       type: type,
     },
-    take: 100,
+    orderBy: {
+      created_at: order,
+    },
+    take: 30,
   });
   const chunkedData = [] as any;
   const data = [] as any;
+  // console.log({ urls });
   for (const url of urls) {
     const chunkedContentData = await getChunks({
       title: url.meta,
@@ -24,13 +29,16 @@ const handler = async (req, res) => {
       content: url?.content,
       project_id: url.project_id,
     });
+    // console.log({ chunkedContentData });
     chunkedData.push(chunkedContentData);
-    data.push({
-      id: url.project_id,
-      ...chunkedContentData,
-    });
+    await generateEmbeddings(prisma, [
+      {
+        id: url.project_id,
+        ...chunkedContentData,
+      },
+    ]);
   }
-  await generateEmbeddings(prisma, data);
+  // console.log({ data });
   res.status(200).json({ success: true, data: [] });
 };
 

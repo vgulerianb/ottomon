@@ -77,7 +77,6 @@ export const generateEmbeddings = async (prisma, data) => {
           input: chunk.content,
         });
         const [{ embedding }] = embeddingResponse.data.data;
-        console.log({ embedding, v: chunk?.content?.length });
         try {
           await prisma.$queryRaw`INSERT INTO embeddings (content_title, content_url, content, content_tokens, project_id, embedding)
         VALUES (${chunk.content_title}, ${chunk.content_url}, ${chunk.content}, ${chunk.content_tokens}, ${currentData.id}, ${embedding})
@@ -90,7 +89,7 @@ export const generateEmbeddings = async (prisma, data) => {
           });
           await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (e) {
-          //
+          console.log({ e });
         }
         // promise works for it has error when you embedding stuff, might be read limited thing. it will wait 1 second and try again
       }
