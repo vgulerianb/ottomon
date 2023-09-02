@@ -3,18 +3,20 @@ import {
   getUrls,
   getYoutubeCaptions,
 } from "@/app/services/ottomon.service";
+import { prisma } from "@/prisma/db";
 import { NextResponse } from "next/server";
-
+const { v4: uuidv4 } = require("uuid");
 const ytpl = require("ytpl");
 
 export async function POST(req: Request) {
   const request = await req.json();
   const { name, url, type } = request;
   const startTime = Date.now();
+  const projectId = uuidv4() + new Date().getTime();
   let finalResponse = [];
   if (type === "youtube") {
     const playlist = await ytpl(url, {
-      limit: 50,
+      limit: 120,
     });
     const formattedPlaylist = [
       {
@@ -30,11 +32,11 @@ export async function POST(req: Request) {
     ];
     for (let i = 0; i < formattedPlaylist?.length; i++) {
       const item = formattedPlaylist[i];
-      const content = await getYoutubeCaptions(item?.url);
+      const content = i < 10 ? await getYoutubeCaptions(item?.url) : "";
       if (!content) continue;
       formattedPlaylist[i] = {
         ...item,
-        content: item?.content + "\n" + content,
+        content: i < 10 ? item?.content + "\n" + content : "",
       };
     }
     finalResponse = formattedPlaylist;
@@ -44,6 +46,28 @@ export async function POST(req: Request) {
     const websiteUrls = await getUrls(url);
     finalResponse = Object.values(websiteUrls?.urlMap || {});
   }
+  await prisma.projects.create({
+    data: {
+      project_id: projectId,
+      project_name: name,
+      created_by: "vguleria1108@gmail.com",
+      status: "active",
+    },
+  });
+  await prisma.taskqueue
+    .createMany({
+      data: finalResponse?.map((item) => ({
+        project_id: projectId,
+        url: item?.fileUrl,
+        meta: item?.url,
+        type: type,
+        content: item?.content,
+      })),
+      skipDuplicates: true,
+    })
+    .catch((error) => {
+      console.log("error", error);
+    });
   return NextResponse.json({
     finalResponse,
     timeTakenToRespond: Date.now() - startTime,
