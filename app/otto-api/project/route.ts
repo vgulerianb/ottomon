@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   const { name, url, type } = request;
   const startTime = Date.now();
   const projectId = uuidv4() + new Date().getTime();
-  let finalResponse = [];
+  let finalResponse = [] as any;
   if (type === "youtube") {
     const playlist = await ytpl(url, {
       limit: 120,
