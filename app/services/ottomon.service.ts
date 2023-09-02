@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getSubtitles } from "youtube-captions-scraper";
 import { load } from "cheerio";
+// import { Configuration, OpenAIApi } from "openai";
 
 export const getUrls = async (url, urlMap = {}, depth = 0) => {
   let urlSet = new Set();
@@ -130,4 +131,38 @@ export const getGitHubRepoFiles = async (githubUrl) => {
 
   // Start fetching files from the root folder.
   return fetchFilesInFolder("");
+};
+
+export const generateEmbeddings = async (prisma, data) => {
+  //   const configuration = new Configuration({
+  //     apiKey: process.env.OPENAI_API_KEY,
+  //   });
+  //   const openai = new OpenAIApi(configuration);
+  //   try {
+  //     for (let i = 0; i < data.length; i++) {
+  //       const currentData = data[i];
+  //       for (let j = 0; j < currentData?.chunks?.length; j++) {
+  //         const chunk = currentData.chunks[j];
+  //         const embeddingResponse = await openai.createEmbedding({
+  //           model: "text-embedding-ada-002",
+  //           input: chunk.content,
+  //         });
+  //         const [{ embedding }] = embeddingResponse.data.data;
+
+  //         await prisma.$queryRaw`INSERT INTO embeddings (content_title, content_url, content, content_tokens, project_id, embedding)
+  //         VALUES (${chunk.content_title}, ${chunk.content_url}, ${chunk.content}, ${chunk.content_tokens}, ${currentData.id}, ${embedding})
+  //         ON CONFLICT (content, project_id) DO NOTHING;`;
+  //         await prisma.taskqueue.deleteMany({
+  //           where: {
+  //             url: chunk.content_url,
+  //           },
+  //         });
+  //         await new Promise((resolve) => setTimeout(resolve, 1000));
+  //         // promise works for it has error when you embedding stuff, might be read limited thing. it will wait 1 second and try again
+  //       }
+  //     }
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  return;
 };
