@@ -271,7 +271,7 @@ const BotBoddy = () => {
               placeholder="Ask me something"
             />
             <button
-              disabled
+              onClick={!loading ? () => handleSearch(search) : undefined}
               className="bg-[rgb(133,89,244)] text-sm px-[8px] rounded-md"
             >
               Ask
