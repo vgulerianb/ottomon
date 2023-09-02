@@ -1,33 +1,45 @@
 {
   "crons": [
     {
-      "path": "/api/ueue?type=github&order=asc",
+      "path": "/api/queue?type=github&order=asc",
 
       "schedule": "* * * * *"
     },
     {
-      "path": "/api/ueue?type=website&order=asc",
+      "path": "/api/queue?type=website&order=asc",
 
       "schedule": "* * * * *"
     },
     {
-      "path": "/api/ueue?type=youtube&order=asc",
+      "path": "/api/queue?type=youtube&order=asc",
 
       "schedule": "* * * * *"
     },
     {
-      "path": "/api/ueue?type=github&order=desc",
+      "path": "/api/queue?type=github&order=desc",
 
       "schedule": "* * * * *"
     },
     {
-      "path": "/api/ueue?type=website&order=desc",
+      "path": "/api/queue?type=website&order=desc",
 
       "schedule": "* * * * *"
     },
     {
-      "path": "/api/ueue?type=youtube&order=desc",
+      "path": "/api/queue?type=youtube&order=desc",
 
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/contentqueue?type=youtube",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/contentqueue?type=website",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/contentqueue?type=github",
       "schedule": "* * * * *"
     }
   ]
