@@ -16,7 +16,7 @@ const handler = async (req, res) => {
     orderBy: {
       created_at: order,
     },
-    take: 30,
+    take: 10,
   });
   const chunkedData = [] as any;
   const data = [] as any;
