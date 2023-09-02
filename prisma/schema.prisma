@@ -34,20 +34,18 @@ model projects {
   meta          String?
   conversations conversations[]
   embeddings    embeddings[]
-  users         users?          @relation(fields: [created_by], references: [email], onDelete: NoAction, onUpdate: NoAction)
   taskqueue     taskqueue[]
 
   @@id([id, project_id])
 }
 
 model users {
-  id         BigInt     @unique @default(autoincrement())
-  created_at DateTime?  @default(now()) @db.Timestamptz(6)
-  email      String     @unique
+  id         BigInt    @unique @default(autoincrement())
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  email      String    @unique
   name       String?
   password   String?
   meta       String?
-  projects   projects[]
 
   @@id([id, email])
 }

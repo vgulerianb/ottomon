@@ -1,5 +1,7 @@
+import { Configuration, OpenAIApi } from "openai";
+
 const { encode } = require("gpt-3-encoder");
-const CHUNK_SIZE = 350;
+const CHUNK_SIZE = 250;
 
 export const getChunks = async (contentDetails) => {
   const { title, url, date, content, project_id } = contentDetails;
@@ -58,4 +60,43 @@ export const getChunks = async (contentDetails) => {
   }
   contentDetails.chunks = dataChunks;
   return contentDetails;
+};
+
+export const generateEmbeddings = async (prisma, data) => {
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+  const openai = new OpenAIApi(configuration);
+  try {
+    for (let i = 0; i < data.length; i++) {
+      const currentData = data[i];
+      for (let j = 0; j < currentData?.chunks?.length; j++) {
+        const chunk = currentData.chunks[j];
+        const embeddingResponse = await openai.createEmbedding({
+          model: "text-embedding-ada-002",
+          input: chunk.content,
+        });
+        const [{ embedding }] = embeddingResponse.data.data;
+        console.log({ embedding, v: chunk?.content?.length });
+        try {
+          await prisma.$queryRaw`INSERT INTO embeddings (content_title, content_url, content, content_tokens, project_id, embedding)
+        VALUES (${chunk.content_title}, ${chunk.content_url}, ${chunk.content}, ${chunk.content_tokens}, ${currentData.id}, ${embedding})
+        ON CONFLICT (content, project_id) DO NOTHING;`;
+          await prisma.taskqueue.deleteMany({
+            where: {
+              url: chunk.content_url,
+              project_id: chunk?.project_id,
+            },
+          });
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        } catch (e) {
+          //
+        }
+        // promise works for it has error when you embedding stuff, might be read limited thing. it will wait 1 second and try again
+      }
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  return;
 };

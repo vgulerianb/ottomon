@@ -1,4 +1,4 @@
-import { getChunks } from "@/app/services/queue.service";
+import { generateEmbeddings, getChunks } from "@/app/services/queue.service";
 import { prisma } from "@/prisma/db";
 
 const handler = async (req, res) => {
@@ -30,6 +30,7 @@ const handler = async (req, res) => {
       ...chunkedContentData,
     });
   }
+  await generateEmbeddings(prisma, data);
   res.status(200).json({ success: true, data: [] });
 };
 

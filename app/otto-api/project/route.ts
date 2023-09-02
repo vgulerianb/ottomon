@@ -27,7 +27,8 @@ export async function POST(req: Request) {
       ...playlist?.items?.map((item) => ({
         url: item.shortUrl,
         fileUrl: item.shortUrl,
-        content: item?.title,
+        content: "",
+        tempContent: item?.title,
       })),
     ];
     for (let i = 0; i < formattedPlaylist?.length; i++) {
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
       if (!content) continue;
       formattedPlaylist[i] = {
         ...item,
-        content: i < 10 ? item?.content + "\n" + content : "",
+        content: i < 10 ? item?.tempContent + "\n" + content : "",
       };
     }
     finalResponse = formattedPlaylist;
@@ -56,13 +57,15 @@ export async function POST(req: Request) {
   });
   await prisma.taskqueue
     .createMany({
-      data: finalResponse?.map((item) => ({
-        project_id: projectId,
-        url: item?.fileUrl,
-        meta: item?.url,
-        type: type,
-        content: item?.content,
-      })),
+      data: finalResponse?.map(
+        (item: { fileUrl: string; url: string; content: string }) => ({
+          project_id: projectId,
+          url: item?.fileUrl,
+          meta: item?.url,
+          type: type,
+          content: item?.content,
+        })
+      ),
       skipDuplicates: true,
     })
     .catch((error) => {
