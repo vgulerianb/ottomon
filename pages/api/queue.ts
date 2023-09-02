@@ -6,6 +6,7 @@ const handler = async (req, res) => {
   const type = queryParams.type;
   const order = queryParams.order;
   const target = queryParams.target;
+  const startTime = Date.now();
   const urls = await prisma.taskqueue.findMany({
     where: {
       // content is not ""
@@ -36,6 +37,10 @@ const handler = async (req, res) => {
     // console.log({ chunkedContentData });
     chunkedData.push(chunkedContentData);
     console.log("Generating Embeddings", chunkedContentData?.url);
+    if (Date.now() - startTime > 50000) {
+      res.status(200).json({ success: true, data: [] });
+      return;
+    }
     await generateEmbeddings(prisma, [
       {
         id: url.project_id,
