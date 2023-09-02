@@ -5,6 +5,7 @@ const handler = async (req, res) => {
   const queryParams = req.query;
   const type = queryParams.type;
   const order = queryParams.order;
+  const target = queryParams.target;
   const urls = await prisma.taskqueue.findMany({
     where: {
       // content is not ""
@@ -16,12 +17,15 @@ const handler = async (req, res) => {
     orderBy: {
       created_at: order,
     },
-    take: 10,
+    take: type === "website" ? 100 : 20,
   });
   const chunkedData = [] as any;
   const data = [] as any;
   // console.log({ urls });
-  for (const url of urls) {
+  for (let i = 0; i < urls.length; i++) {
+    if (target == 1 && i % 2 !== 0) continue;
+    if (target == 0 && i % 2 === 0) continue;
+    const url = urls[i];
     const chunkedContentData = await getChunks({
       title: url.meta,
       url: url?.url,
@@ -31,6 +35,7 @@ const handler = async (req, res) => {
     });
     // console.log({ chunkedContentData });
     chunkedData.push(chunkedContentData);
+    console.log("Generating Embeddings", chunkedContentData?.url);
     await generateEmbeddings(prisma, [
       {
         id: url.project_id,

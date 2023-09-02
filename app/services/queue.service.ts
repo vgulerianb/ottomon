@@ -72,6 +72,7 @@ export const generateEmbeddings = async (prisma, data) => {
       const currentData = data[i];
       for (let j = 0; j < currentData?.chunks?.length; j++) {
         const chunk = currentData.chunks[j];
+        console.log("Generating Embeddings 2", chunk?.content_url);
         const embeddingResponse = await openai.createEmbedding({
           model: "text-embedding-ada-002",
           input: chunk.content,
