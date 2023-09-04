@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { RenderCode } from "../components/YoutubeVideoComponent";
 import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const Faqs = {
   buildspace: [
@@ -25,6 +26,14 @@ export default function Home() {
   const [addModal, setAddModal] = useState<boolean>(false);
   const [website, setWebsite] = useState<string>("Submit");
   const [botActive, setBotActive] = useState<boolean>(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) return;
+    else {
+      router.push("/");
+    }
+  }, []);
 
   const handleSubmit = async () => {
     // regex for email

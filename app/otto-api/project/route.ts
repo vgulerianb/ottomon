@@ -3,6 +3,7 @@ import {
   getUrls,
   getYoutubeCaptions,
 } from "@/app/services/ottomon.service";
+import { verifyToken } from "@/app/services/verifyToken";
 import { prisma } from "@/prisma/db";
 import { NextResponse } from "next/server";
 const { v4: uuidv4 } = require("uuid");
@@ -10,6 +11,12 @@ const ytpl = require("ytpl");
 
 export async function POST(req: Request) {
   const request = await req.json();
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) return new Response("No auth header", { status: 500 });
+  console.log({ authHeader });
+  const user = await verifyToken(authHeader);
+  console.log({ user });
+  if (!user.success) return new Response("No user", { status: 401 });
   const { name, url, type } = request;
   const startTime = Date.now();
   const projectId = uuidv4() + new Date().getTime();
@@ -51,7 +58,7 @@ export async function POST(req: Request) {
     data: {
       project_id: projectId,
       project_name: name,
-      created_by: "vguleria1108@gmail.com",
+      created_by: user?.email,
       status: "active",
     },
   });
@@ -74,5 +81,26 @@ export async function POST(req: Request) {
   return NextResponse.json({
     finalResponse,
     timeTakenToRespond: Date.now() - startTime,
+  });
+}
+
+export async function GET(req: Request) {
+  // Authorization header
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) return new Response("No auth header", { status: 500 });
+  console.log({ authHeader });
+  const user = await verifyToken(authHeader);
+  console.log({ user });
+  const projects = await prisma.projects.findMany({
+    where: {
+      created_by: user?.email,
+    },
+  });
+  console.log({ projects });
+  return NextResponse.json({
+    projects: projects.map((item) => ({
+      ...item,
+      id: undefined,
+    })),
   });
 }
