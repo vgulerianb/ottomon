@@ -1,4 +1,5 @@
 import {
+  YoutubeChannelId,
   getGitHubRepoFiles,
   getUrls,
   getYoutubeCaptions,
@@ -15,14 +16,16 @@ export async function POST(req: Request) {
   if (!authHeader) return new Response("No auth header", { status: 500 });
   console.log({ authHeader });
   const user = await verifyToken(authHeader);
-  console.log({ user });
   if (!user.success) return new Response("No user", { status: 401 });
   const { name, url, type } = request;
   const startTime = Date.now();
   const projectId = uuidv4() + new Date().getTime();
   let finalResponse = [] as any;
   if (type === "youtube") {
-    const playlist = await ytpl(url, {
+    const channelId = await YoutubeChannelId(url);
+    console.log({ channelId });
+    if (!channelId) return new Response("No channel id", { status: 500 });
+    const playlist = await ytpl(`https://youtube.com/channel/${channelId}`, {
       limit: 120,
     });
     const formattedPlaylist = [
@@ -79,7 +82,7 @@ export async function POST(req: Request) {
       console.log("error", error);
     });
   return NextResponse.json({
-    finalResponse,
+    finalResponse: finalResponse?.length,
     timeTakenToRespond: Date.now() - startTime,
   });
 }

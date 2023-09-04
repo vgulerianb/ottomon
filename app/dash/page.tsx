@@ -6,6 +6,7 @@ import { RenderCode } from "../components/YoutubeVideoComponent";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Loading from "../components/SvgComps/loading";
 
 const Faqs = {
   buildspace: [
@@ -27,6 +28,7 @@ export default function Home() {
   const [website, setWebsite] = useState<string>("Submit");
   const [botActive, setBotActive] = useState<boolean>(false);
   const router = useRouter();
+  const [projects, setProjects] = useState<any[]>([]);
 
   useEffect(() => {
     if (localStorage.getItem("token")) return;
@@ -35,50 +37,94 @@ export default function Home() {
     }
   }, []);
 
-  const handleSubmit = async () => {
-    // regex for email
-    if (!Email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      alert("Please enter a valid email address");
-      return;
-    }
+  const [projectName, setProjectName] = useState<string>("");
+  const [projectType, setProjectType] = useState<string>("website");
+  const [url, setUrl] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [urlsFound, setUrlsFound] = useState<number>(0);
+
+  useEffect(() => {
+    getProjects();
+  }, []);
+
+  const getProjects = async () => {
     await axios
-      .post("/api/waitlist", {
-        email: Email,
+      .get("/otto-api/project", {
+        headers: {
+          Authorization: `${localStorage.getItem("token")}`,
+        },
       })
-      .then(() => {
-        setEmail("");
-        alert("You've been added to the waitlist!");
+      .then((res) => {
+        console.log(res);
+        setProjects(res?.data?.projects || []);
       });
   };
 
-  const startTimer = () => {
-    // change website to Submitting... after 3 second Genrating FAQs
-    setWebsite("Submitting...");
-    setTimeout(() => {
-      // change website to Submit after 3 second Genrating FAQs
-      setWebsite("Generating FAQs...");
-      // setCreated(true);
-      // setAddModal(false);
-      setTimeout(() => {
-        // change website to Submit after 3 second Genrating FAQs
-        setWebsite("Generated!");
-        setCreated(true);
-        setAddModal(false);
-      }, 1000);
-    }, 2000);
+  const createNewProject = async () => {
+    setLoading(true);
+    await axios
+      .post(
+        "/otto-api/project",
+        {
+          name: projectName,
+          type: projectType,
+          url: url,
+        },
+        {
+          headers: {
+            Authorization: `${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        setUrlsFound(res?.data?.finalResponse);
+        getProjects();
+        setTimeout(() => {
+          setLoading(false);
+        }, 60000);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+    setAddModal(false);
   };
 
   return (
     <div className="w-screen h-screen flex justify-center items-center">
+      {loading ? (
+        <div className="fixed w-full h-full flex justify-center items-center z-[1200]">
+          <div className="bg-[#131313]/30 w-full h-full absolute top-0 left-0 blur-[20px]"></div>
+          <div className="w-[250px] relative z-[1210] flex-col gap-[4px] bg-[#131313] rounded-md p-[16px] border-gray-700 border flex justify-center items-center">
+            <Loading />
+            <span>Please wait</span>
+            {urlsFound ? (
+              <span className="text-xs text-center">
+                {urlsFound} Resources found on given url. Please wait while we
+                process them this can take upto 2 minutes.
+              </span>
+            ) : (
+              ""
+            )}
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
       {addModal ? (
         <>
-          <div className="w-screen h-screen fixed top-0 left-0 bg-black/40 z-[1000] flex justify-center items-center">
-            <div className="w-[700px] bg-black flex flex-col relative z-[1000] rounded-md border border-gray-700">
+          <div className="w-screen h-screen fixed top-0 left-0 flex justify-center items-center z-[100]">
+            <div className="w-[700px] bg-black flex flex-col relative  rounded-md border border-gray-700">
               <div className="p-[8px] text-white border-b border-gray-700">
                 New Project
               </div>
               <div className="p-[16px] text-white border-b border-gray-700 flex flex-col">
                 <input
+                  value={projectName}
+                  onChange={(e) => {
+                    setProjectName(e.target.value);
+                  }}
                   placeholder="Project Name"
                   className="text-white/70 outline-none w-full border-gray-700 border p-[4px] bg-black text-xs rounded-md"
                 />
@@ -86,24 +132,54 @@ export default function Home() {
                   Bot Type
                 </span>
                 <div className="flex gap-[16px]">
-                  <div className="py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border border-white cursor-pointer">
+                  <div
+                    onClick={() => {
+                      setProjectType("website");
+                    }}
+                    className={`py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border ${
+                      projectType === "website"
+                        ? "border-white"
+                        : "border-gray-700"
+                    } cursor-pointer`}
+                  >
                     <img src="/web.png" width={32} height={32} alt="ottomon" />
                     <span className="text-white/70 text-sm">Website</span>
                   </div>
-                  <div className="py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border border-gray-700 cursor-pointer">
+                  <div
+                    onClick={() => {
+                      setProjectType("youtube");
+                    }}
+                    className={`py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border ${
+                      projectType === "youtube"
+                        ? "border-white"
+                        : "border-gray-700"
+                    } cursor-pointer`}
+                  >
                     <img src="/you.png" width={32} height={32} alt="ottomon" />
                     <span className="text-white/70 text-sm">Youtube</span>
                   </div>
                 </div>
-                <span className="text-xs text-white/80 mt-[16px]">Website</span>
+                <span className="text-xs text-white/80 mt-[16px] uppercase">
+                  {projectType === "website"
+                    ? "Website Url"
+                    : "Youtube channel url"}
+                </span>
                 <input
-                  placeholder="https://ottomon.in"
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                  }}
+                  placeholder={
+                    projectType === "website"
+                      ? "https://buildspace.io"
+                      : "https://youtube.com/channel/83883"
+                  }
                   className="text-white/70 mt-[4px] outline-none w-full border-gray-700 border p-[4px] bg-black text-xs h-[32px] rounded-md"
                 />
                 <button
                   type="button"
                   onClick={() => {
-                    startTimer();
+                    createNewProject();
                   }}
                   className={`mt-[16px] w-full text-white h-[40px] bg-gradient-to-br ${"from-purple-600 to-blue-500"}  hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm flex  items-center justify-center text-center mr-2 mb-2`}
                 >
@@ -202,13 +278,11 @@ export default function Home() {
                       Add New
                     </button>
                   </div>
-                  <div className="flex gap-[16px] items-center justify-start w-full mt-[32px]">
-                    {created ? (
+                  <div className="flex gap-[16px] flex-wrap items-center justify-start w-full mt-[32px]">
+                    {projects?.map((val) => (
                       <div
-                        onClick={() => {
-                          setBotActive(true);
-                        }}
-                        className=" p-[16px] rounded-md border border-gray-700 hover:border-white cursor-pointer bg-black"
+                        key={val?.project_id}
+                        className=" p-[16px] w-[250px] rounded-md border border-gray-700 hover:border-white cursor-pointer bg-black"
                       >
                         <div className="flex gap-[8px] items-center ">
                           <img
@@ -218,50 +292,23 @@ export default function Home() {
                           />
                           <div className="flex flex-col text-left">
                             <span className="text-white text-sm font-semibold">
-                              Buildspace
+                              {val?.project_name}
                             </span>
                             <span className="text-white/70 text-sm">
-                              Bot for buildspace website
+                              No description
                             </span>
                           </div>
                         </div>
                         <div className="w-full buildspacecard text-left text-white/70 mt-[30px] flex justify-between">
                           <span className="text-xs font-semibold ">
-                            Created by <span>Vikrant</span>
-                          </span>
-                          {/* <button className="bg-[rgb(133,89,244)] text-white  text-sm px-[8px] rounded-md">
-                          Try me
-                        </button> */}
-                        </div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    <div className=" p-[16px] rounded-md border border-gray-700 hover:border-white cursor-pointer bg-black">
-                      <div className="flex gap-[8px] items-center ">
-                        <img
-                          src="/you.png"
-                          alt="ottomon"
-                          className="h-[28px] w-[28px] grayscale"
-                        />
-                        <div className="flex flex-col text-left">
-                          <span className="text-white text-sm font-semibold">
-                            Kurzgesagt
-                          </span>
-                          <span className="text-white/70 text-sm">
-                            Bot for Kurzgesagt youtube
+                            Created on{" "}
+                            <span>
+                              {new Date(val?.created_at).toLocaleDateString()}
+                            </span>
                           </span>
                         </div>
                       </div>
-                      <div className="w-full buildspacecard text-left text-white/70 mt-[30px] flex justify-between">
-                        <span className="text-xs font-semibold ">
-                          Created by <span>Vikrant</span>
-                        </span>
-                        {/* <button className="bg-[rgb(133,89,244)] text-white  text-sm px-[8px] rounded-md">
-                          Try me
-                        </button> */}
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
                 {botActive ? (

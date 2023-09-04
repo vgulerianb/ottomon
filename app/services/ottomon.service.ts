@@ -131,3 +131,30 @@ export const getGitHubRepoFiles = async (githubUrl) => {
   // Start fetching files from the root folder.
   return fetchFilesInFolder("");
 };
+
+export const YoutubeChannelId = async (youtubeUrl) => {
+  const https = require("https");
+  return new Promise((resolve, reject) => {
+    https
+      .get(youtubeUrl, (res) => {
+        let data = "";
+
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+
+        res.on("end", () => {
+          const channelMatch = data.match(/"channelId":"(.*?)"/);
+
+          if (channelMatch && channelMatch[1]) {
+            resolve(channelMatch[1]);
+          } else {
+            reject(new Error("Channel ID not found"));
+          }
+        });
+      })
+      .on("error", (e) => {
+        reject(new Error("Got an error: " + e.message));
+      });
+  });
+};
