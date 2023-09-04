@@ -14,7 +14,7 @@
   "dependencies": {
     "@magic-sdk/admin": "^2.0.0",
     "@prisma/client": "^5.0.0",
-    "@supabase/supabase-js": "^2.26.0",
+    "@supabase/supabase-js": "^2.21.0",
     "@types/node": "20.4.3",
     "@types/react": "18.2.15",
     "@types/react-dom": "18.2.7",
@@ -24,6 +24,7 @@
     "cheerio": "^1.0.0-rc.12",
     "eslint": "8.45.0",
     "eslint-config-next": "13.4.12",
+    "eventsource-parser": "^1.0.0",
     "googleapis": "^126.0.1",
     "gpt-3-encoder": "^1.1.4",
     "gpt-tokenizer": "^2.1.1",
