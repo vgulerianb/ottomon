@@ -8,6 +8,8 @@ import { RenderCode } from "./components/YoutubeVideoComponent";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Magic } from "magic-sdk";
+import Loading from "./components/SvgComps/loading";
 
 const Faqs = {
   buildspace: [
@@ -25,6 +27,8 @@ const Faqs = {
 export default function Home() {
   const [Email, setEmail] = useState<string>("");
   const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const handleSubmit = async () => {
     // regex for email
@@ -32,18 +36,48 @@ export default function Home() {
       alert("Please enter a valid email address");
       return;
     }
-    await axios
-      .post("/api/waitlist", {
-        email: Email,
+    const magic = new Magic("pk_live_0D93C29D7C5BA056", { network: "mainnet" });
+
+    setLoading(true);
+    magic.auth
+      .loginWithEmailOTP({ email: Email })
+      .then((didToken) => {
+        axios
+          .post("/otto-api/login", { token: didToken })
+          .then((response) => {
+            localStorage.setItem("token", response?.data?.jwtToken);
+            setEmail("");
+            setIsLoggedIn(true);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
       })
-      .then(() => {
-        setEmail("");
-        alert("You've been added to the waitlist!");
+      .catch(() => {
+        alert("Something went wrong, please try again later.");
+        setLoading(false);
       });
   };
 
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
   return (
     <div className="w-screen h-screen flex justify-center items-center">
+      {loading ? (
+        <div className="fixed w-full h-full flex justify-center items-center z-[1200]">
+          <div className="bg-[#131313]/30 w-full h-full absolute top-0 left-0 blur-[20px]"></div>
+          <div className="w-[150px] relative z-[1210] flex-col gap-[4px] bg-[#131313] rounded-md p-[16px] border-gray-700 border flex justify-center items-center">
+            <Loading />
+            <span>Please wait</span>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
       <div className="fixed top-0 flex items-center w-full z-50 p-[16px] max-w-[800px] justify-between">
         <div className="flex items-center">
           <Image src="/logo.png" width={32} height={32} alt="ottomon" />
@@ -69,15 +103,19 @@ export default function Home() {
               d="M23 3.01s-2.018 1.192-3.14 1.53a4.48 4.48 0 00-7.86 3v1a10.66 10.66 0 01-9-4.53s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5 0-.278-.028-.556-.08-.83C21.94 5.674 23 3.01 23 3.01z"
             ></path>
           </svg>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              router.push("/dash");
-            }}
-            className="h-[36px] rounded-md text-sm font-medium whitespace-nowrap p-[8px] outline-none text-black bg-white"
-          >
-            Dashboard
-          </button>
+          {isLoggedIn ? (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                router.push("/dash");
+              }}
+              className="h-[36px] rounded-md text-sm font-medium whitespace-nowrap p-[8px] outline-none text-black bg-white"
+            >
+              Dashboard
+            </button>
+          ) : (
+            ""
+          )}
         </Link>
       </div>
       <Script src="/particles.js" />
@@ -130,20 +168,24 @@ export default function Home() {
                       deploy using just a single line of code.
                     </p>
                   </div>
-                  <div className="flex gap-[8px] max-w-[500px] items-center ">
-                    <input
-                      value={Email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="h-[50px] w-full rounded-md bg-[rgba(89,89,89,0.6)] p-[8px] outline-none"
-                      placeholder="Your Email Address"
-                    />
-                    <button
-                      onClick={handleSubmit}
-                      className="h-[50px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
-                    >
-                      Join Waitlist
-                    </button>
-                  </div>
+                  {!isLoggedIn ? (
+                    <div className="flex gap-[8px] max-w-[500px] items-center ">
+                      <input
+                        value={Email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="h-[50px] w-full rounded-md bg-[rgba(89,89,89,0.6)] p-[8px] outline-none"
+                        placeholder="Your Email Address"
+                      />
+                      <button
+                        onClick={handleSubmit}
+                        className="h-[50px] w-[140px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
+                      >
+                        Login
+                      </button>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                 </div>
                 <div className="mt-[60px] text-3xl">Examples</div>
                 <BotBoddy />
