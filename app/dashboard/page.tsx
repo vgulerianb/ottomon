@@ -27,6 +27,8 @@ export default function Home() {
   const [addModal, setAddModal] = useState<boolean>(false);
   const [website, setWebsite] = useState<string>("Submit");
   const [botActive, setBotActive] = useState<boolean>(false);
+  const [faqs, setFaqs] = useState<string[]>([]);
+  const [projectId, setProjectId] = useState<string>("");
   const router = useRouter();
   const [projects, setProjects] = useState<any[]>([]);
 
@@ -196,31 +198,15 @@ export default function Home() {
         <div className="flex items-center">
           <Image src="/logo.png" width={32} height={32} alt="ottomon" />
         </div>
-        <Link
-          className="flex gap-[16px] items-center cursor-pointer"
-          target="_blank"
-          href="https://x.com/vguleria19"
+        <div
+          className="cursor-pointer relative z-30"
+          onClick={() => {
+            localStorage.removeItem("token");
+            router.push("/");
+          }}
         >
-          {/* <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="1.5em"
-            fill="none"
-            strokeWidth="1.5"
-            color="#FFF"
-            viewBox="0 0 24 24"
-            style={{ width: "20px", height: "20px" }}
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M23 3.01s-2.018 1.192-3.14 1.53a4.48 4.48 0 00-7.86 3v1a10.66 10.66 0 01-9-4.53s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5 0-.278-.028-.556-.08-.83C21.94 5.674 23 3.01 23 3.01z"
-            ></path>
-          </svg> */}
-          <div className="bg-red-800 rounded-full w-[32px] h-[32px] flex justify-center text-sm items-center text-white">
-            V
-          </div>
-        </Link>
+          Logout
+        </div>
       </div>
       {/* <Script src="/particles.js" /> */}
       <div className="w-full flex items-center flex-col transition-all h-full">
@@ -262,6 +248,9 @@ export default function Home() {
                   <canvas data-particle-animation="" />
                 </div>
                 <div className="relative flex flex-col items-center">
+                  <div className="bg-green-800/20 p-[8px] mb-[16px] w-full rounded-md text-sm">
+                    Detailed dashboard and reports coming soon
+                  </div>
                   <div className="flex gap-[8px] max-w-[1200px] w-full items-center ">
                     <input
                       value={Email}
@@ -281,6 +270,11 @@ export default function Home() {
                   <div className="flex gap-[16px] flex-wrap items-center justify-start w-full mt-[32px]">
                     {projects?.map((val) => (
                       <div
+                        onClick={() => {
+                          setBotActive(true);
+                          setProjectId(val?.project_id);
+                          setFaqs(val?.faqs?.[0]?.questions || []);
+                        }}
                         key={val?.project_id}
                         className=" p-[16px] w-[250px] rounded-md border border-gray-700 hover:border-white cursor-pointer bg-black"
                       >
@@ -313,8 +307,12 @@ export default function Home() {
                 </div>
                 {botActive ? (
                   <BotBoddy
+                    faqs={faqs}
+                    projectId={projectId}
                     onClose={() => {
                       setBotActive(false);
+                      setProjectId("");
+                      setFaqs([]);
                     }}
                   />
                 ) : (
@@ -329,7 +327,15 @@ export default function Home() {
   );
 }
 
-const BotBoddy = ({ onClose }: { onClose: () => void }) => {
+const BotBoddy = ({
+  onClose,
+  projectId,
+  faqs,
+}: {
+  onClose: () => void;
+  projectId: string;
+  faqs: string[];
+}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [answer, setAnswer] = useState<string>("");
   const [chats, setChats] = useState<any[]>([]);
@@ -367,10 +373,10 @@ const BotBoddy = ({ onClose }: { onClose: () => void }) => {
 
     await axios
       .post(
-        "/api/chat",
+        "/api/ask",
         {
-          prompt: searchValue,
-          projectId: selected === "buildspace" ? "bs-1782" : "",
+          query: searchValue,
+          projectId: projectId,
         },
         {
           onDownloadProgress: (progressEvent: any) => {
@@ -445,7 +451,7 @@ const BotBoddy = ({ onClose }: { onClose: () => void }) => {
               Quickstarts
             </span>
             <div className="flex flex-col gap-[4px] max-h-[400px]">
-              {Faqs[selected].map((faq, key) => (
+              {faqs.map((faq, key) => (
                 <div
                   key={key}
                   onClick={() => {

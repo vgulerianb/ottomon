@@ -48,6 +48,7 @@ export default function Home() {
             localStorage.setItem("token", response?.data?.jwtToken);
             setEmail("");
             setIsLoggedIn(true);
+            router.push("/dashboard");
           })
           .finally(() => {
             setLoading(false);
@@ -107,7 +108,7 @@ export default function Home() {
             <button
               onClick={(e) => {
                 e.preventDefault();
-                router.push("/dash");
+                router.push("/dashboard");
               }}
               className="h-[36px] rounded-md text-sm font-medium whitespace-nowrap p-[8px] outline-none text-black bg-white"
             >
