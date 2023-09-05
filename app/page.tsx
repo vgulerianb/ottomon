@@ -237,7 +237,7 @@ const BotBoddy = () => {
 
     await axios
       .post(
-        "/api/chat",
+        "/otto-api/chat",
         {
           prompt: searchValue,
           projectId: selected === "buildspace" ? "bs-1782" : "",
