@@ -1,0 +1,64 @@
+{
+  "crons": [
+    {
+      "path": "/api/queue?type=github&order=asc&target=1",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=website&order=asc&target=1",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=youtube&order=asc&target=1",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=github&order=desc&target=1",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=website&order=desc&target=1",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=youtube&order=desc&target=1",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=github&order=asc&target=0",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=website&order=asc&target=0",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=youtube&order=asc&target=0",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=github&order=desc&target=0",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=website&order=desc&target=0",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/queue?type=youtube&order=desc&target=0",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/contentqueue?type=youtube",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/contentqueue?type=website",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/contentqueue?type=github",
+      "schedule": "* * * * *"
+    }
+  ]
+}

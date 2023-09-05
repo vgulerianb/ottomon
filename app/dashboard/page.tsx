@@ -1,15 +1,12 @@
 "use client";
-
-import Script from "next/script";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { RenderCode } from "./components/YoutubeVideoComponent";
+import { RenderCode } from "../components/YoutubeVideoComponent";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Magic } from "magic-sdk";
-import Loading from "./components/SvgComps/loading";
+import Loading from "../components/SvgComps/loading";
 
 const Faqs = {
   buildspace: [
@@ -26,103 +23,195 @@ const Faqs = {
 
 export default function Home() {
   const [Email, setEmail] = useState<string>("");
+  const [created, setCreated] = useState<boolean>(false);
+  const [addModal, setAddModal] = useState<boolean>(false);
+  const [website, setWebsite] = useState<string>("Submit");
+  const [botActive, setBotActive] = useState<boolean>(false);
+  const [faqs, setFaqs] = useState<string[]>([]);
+  const [projectId, setProjectId] = useState<string>("");
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [projects, setProjects] = useState<any[]>([]);
 
-  const handleSubmit = async () => {
-    // regex for email
-    if (!Email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      alert("Please enter a valid email address");
-      return;
+  useEffect(() => {
+    if (localStorage.getItem("token")) return;
+    else {
+      router.push("/");
     }
-    const magic = new Magic("pk_live_0D93C29D7C5BA056", { network: "mainnet" });
+  }, []);
 
-    setLoading(true);
-    magic.auth
-      .loginWithEmailOTP({ email: Email })
-      .then((didToken) => {
-        axios
-          .post("/otto-api/login", { token: didToken })
-          .then((response) => {
-            localStorage.setItem("token", response?.data?.jwtToken);
-            setEmail("");
-            setIsLoggedIn(true);
-            router.push("/dashboard");
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+  const [projectName, setProjectName] = useState<string>("");
+  const [projectType, setProjectType] = useState<string>("website");
+  const [url, setUrl] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [urlsFound, setUrlsFound] = useState<number>(0);
+
+  useEffect(() => {
+    getProjects();
+  }, []);
+
+  const getProjects = async () => {
+    await axios
+      .get("/otto-api/project", {
+        headers: {
+          Authorization: `${localStorage.getItem("token")}`,
+        },
       })
-      .catch(() => {
-        alert("Something went wrong, please try again later.");
-        setLoading(false);
+      .then((res) => {
+        console.log(res);
+        setProjects(res?.data?.projects || []);
       });
   };
 
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      setIsLoggedIn(true);
-    }
-  }, []);
+  const createNewProject = async () => {
+    setLoading(true);
+    await axios
+      .post(
+        "/otto-api/project",
+        {
+          name: projectName,
+          type: projectType,
+          url: url,
+        },
+        {
+          headers: {
+            Authorization: `${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        setUrlsFound(res?.data?.finalResponse);
+        getProjects();
+        setTimeout(() => {
+          setLoading(false);
+        }, 60000);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+    setAddModal(false);
+  };
 
   return (
     <div className="w-screen h-screen flex justify-center items-center">
       {loading ? (
         <div className="fixed w-full h-full flex justify-center items-center z-[1200]">
           <div className="bg-[#131313]/30 w-full h-full absolute top-0 left-0 blur-[20px]"></div>
-          <div className="w-[150px] relative z-[1210] flex-col gap-[4px] bg-[#131313] rounded-md p-[16px] border-gray-700 border flex justify-center items-center">
+          <div className="w-[250px] relative z-[1210] flex-col gap-[4px] bg-[#131313] rounded-md p-[16px] border-gray-700 border flex justify-center items-center">
             <Loading />
             <span>Please wait</span>
+            {urlsFound ? (
+              <span className="text-xs text-center">
+                {urlsFound} Resources found on given url. Please wait while we
+                process them this can take upto 2 minutes.
+              </span>
+            ) : (
+              ""
+            )}
           </div>
         </div>
       ) : (
         ""
       )}
-      <div className="fixed top-0 flex items-center w-full z-50 p-[16px] max-w-[800px] justify-between">
+      {addModal ? (
+        <>
+          <div className="w-screen h-screen fixed top-0 left-0 flex justify-center items-center z-[100]">
+            <div className="w-[700px] bg-black flex flex-col relative  rounded-md border border-gray-700">
+              <div className="p-[8px] text-white border-b border-gray-700">
+                New Project
+              </div>
+              <div className="p-[16px] text-white border-b border-gray-700 flex flex-col">
+                <input
+                  value={projectName}
+                  onChange={(e) => {
+                    setProjectName(e.target.value);
+                  }}
+                  placeholder="Project Name"
+                  className="text-white/70 outline-none w-full border-gray-700 border p-[4px] bg-black text-xs rounded-md"
+                />
+                <span className="text-xs text-white/80 mt-[16px]">
+                  Bot Type
+                </span>
+                <div className="flex gap-[16px]">
+                  <div
+                    onClick={() => {
+                      setProjectType("website");
+                    }}
+                    className={`py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border ${
+                      projectType === "website"
+                        ? "border-white"
+                        : "border-gray-700"
+                    } cursor-pointer`}
+                  >
+                    <img src="/web.png" width={32} height={32} alt="ottomon" />
+                    <span className="text-white/70 text-sm">Website</span>
+                  </div>
+                  <div
+                    onClick={() => {
+                      setProjectType("youtube");
+                    }}
+                    className={`py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border ${
+                      projectType === "youtube"
+                        ? "border-white"
+                        : "border-gray-700"
+                    } cursor-pointer`}
+                  >
+                    <img src="/you.png" width={32} height={32} alt="ottomon" />
+                    <span className="text-white/70 text-sm">Youtube</span>
+                  </div>
+                </div>
+                <span className="text-xs text-white/80 mt-[16px] uppercase">
+                  {projectType === "website"
+                    ? "Website Url"
+                    : "Youtube channel url"}
+                </span>
+                <input
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                  }}
+                  placeholder={
+                    projectType === "website"
+                      ? "https://buildspace.io"
+                      : "https://youtube.com/channel/83883"
+                  }
+                  className="text-white/70 mt-[4px] outline-none w-full border-gray-700 border p-[4px] bg-black text-xs h-[32px] rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    createNewProject();
+                  }}
+                  className={`mt-[16px] w-full text-white h-[40px] bg-gradient-to-br ${"from-purple-600 to-blue-500"}  hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm flex  items-center justify-center text-center mr-2 mb-2`}
+                >
+                  {website}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        ""
+      )}
+      <div className="fixed top-0 flex items-center w-full z-50 p-[16px] max-w-[1200px] justify-between">
         <div className="flex items-center">
           <Image src="/logo.png" width={32} height={32} alt="ottomon" />
         </div>
-        <Link
-          className="flex gap-[16px] items-center cursor-pointer"
-          target="_blank"
-          href="https://x.com/vguleria19"
+        <div
+          className="cursor-pointer relative z-30"
+          onClick={() => {
+            localStorage.removeItem("token");
+            router.push("/");
+          }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="1.5em"
-            fill="none"
-            strokeWidth="1.5"
-            color="#FFF"
-            viewBox="0 0 24 24"
-            style={{ width: "20px", height: "20px" }}
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M23 3.01s-2.018 1.192-3.14 1.53a4.48 4.48 0 00-7.86 3v1a10.66 10.66 0 01-9-4.53s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5 0-.278-.028-.556-.08-.83C21.94 5.674 23 3.01 23 3.01z"
-            ></path>
-          </svg>
-          {isLoggedIn ? (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                router.push("/dashboard");
-              }}
-              className="h-[36px] rounded-md text-sm font-medium whitespace-nowrap p-[8px] outline-none text-black bg-white"
-            >
-              Dashboard
-            </button>
-          ) : (
-            ""
-          )}
-        </Link>
+          Logout
+        </div>
       </div>
-      <Script src="/particles.js" />
+      {/* <Script src="/particles.js" /> */}
       <div className="w-full flex items-center flex-col transition-all h-full">
         <div className="relative font-inter antialiased w-full h-fit">
-          <main className="relative min-h-screen flex flex-col justify-center bg-[#131313] overflow-hidden">
+          <main className="relative min-h-screen flex flex-col bg-[#131313] overflow-hidden">
             <div className="w-full max-w-6xl mx-auto px-4 md:px-6 py-24">
               <div className="text-center">
                 {/* Illustration #1 */}
@@ -159,37 +248,76 @@ export default function Home() {
                   <canvas data-particle-animation="" />
                 </div>
                 <div className="relative flex flex-col items-center">
-                  <h1 className="max-w-[550px] inline-flex font-extrabold text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-slate-200 via-slate-200 to-slate-200/60 pb-4">
-                    Chat with code, videos, and docs
-                  </h1>
-                  <div className="max-w-3xl mx-auto mb-8">
-                    <p className="text-lg text-slate-400">
-                      Elevate your data apps with seamless, production-ready
-                      chat integration. Effortlessly ingest, personalize, and
-                      deploy using just a single line of code.
-                    </p>
+                  <div className="bg-green-800/20 p-[8px] mb-[16px] w-full rounded-md text-sm">
+                    Detailed dashboard and reports coming soon
                   </div>
-                  {!isLoggedIn ? (
-                    <div className="flex gap-[8px] max-w-[500px] items-center ">
-                      <input
-                        value={Email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="h-[50px] w-full rounded-md bg-[rgba(89,89,89,0.6)] p-[8px] outline-none"
-                        placeholder="Your Email Address"
-                      />
-                      <button
-                        onClick={handleSubmit}
-                        className="h-[50px] w-[140px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
+                  <div className="flex gap-[8px] max-w-[1200px] w-full items-center ">
+                    <input
+                      value={Email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-[32px] w-full rounded-md bg-[rgba(89,89,89,0.6)] p-[8px] outline-none"
+                      placeholder="Search projects"
+                    />
+                    <button
+                      onClick={() => {
+                        setAddModal(true);
+                      }}
+                      className="h-[32px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
+                    >
+                      Add New
+                    </button>
+                  </div>
+                  <div className="flex gap-[16px] flex-wrap items-center justify-start w-full mt-[32px]">
+                    {projects?.map((val) => (
+                      <div
+                        onClick={() => {
+                          setBotActive(true);
+                          setProjectId(val?.project_id);
+                          setFaqs(val?.faqs?.[0]?.questions || []);
+                        }}
+                        key={val?.project_id}
+                        className=" p-[16px] w-[250px] rounded-md border border-gray-700 hover:border-white cursor-pointer bg-black"
                       >
-                        Login
-                      </button>
-                    </div>
-                  ) : (
-                    ""
-                  )}
+                        <div className="flex gap-[8px] items-center ">
+                          <img
+                            src="/web.png"
+                            alt="ottomon"
+                            className="h-[28px] w-[28px] grayscale"
+                          />
+                          <div className="flex flex-col text-left">
+                            <span className="text-white text-sm font-semibold">
+                              {val?.project_name}
+                            </span>
+                            <span className="text-white/70 text-sm">
+                              No description
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full buildspacecard text-left text-white/70 mt-[30px] flex justify-between">
+                          <span className="text-xs font-semibold ">
+                            Created on{" "}
+                            <span>
+                              {new Date(val?.created_at).toLocaleDateString()}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="mt-[60px] text-3xl">Examples</div>
-                <BotBoddy />
+                {botActive ? (
+                  <BotBoddy
+                    faqs={faqs}
+                    projectId={projectId}
+                    onClose={() => {
+                      setBotActive(false);
+                      setProjectId("");
+                      setFaqs([]);
+                    }}
+                  />
+                ) : (
+                  ""
+                )}
               </div>
             </div>
           </main>
@@ -199,7 +327,15 @@ export default function Home() {
   );
 }
 
-const BotBoddy = () => {
+const BotBoddy = ({
+  onClose,
+  projectId,
+  faqs,
+}: {
+  onClose: () => void;
+  projectId: string;
+  faqs: string[];
+}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [answer, setAnswer] = useState<string>("");
   const [chats, setChats] = useState<any[]>([]);
@@ -237,10 +373,10 @@ const BotBoddy = () => {
 
     await axios
       .post(
-        "/api/chat",
+        "/api/ask",
         {
-          prompt: searchValue,
-          projectId: selected === "buildspace" ? "bs-1782" : "",
+          query: searchValue,
+          projectId: projectId,
         },
         {
           onDownloadProgress: (progressEvent: any) => {
@@ -276,30 +412,16 @@ const BotBoddy = () => {
   }, [answer, loading]);
 
   return (
-    <>
-      <div className="flex gap-[8px] items-center justify-center my-[16px]">
-        <div
-          onClick={() => setSelected("buildspace")}
-          className={`${
-            selected === "buildspace"
-              ? "bg-gray-600 text-white"
-              : "text-gray-400"
-          } cursor-pointer p-[4px] rounded-md w-[150px] border border-gray-700`}
-        >
-          Buildspace
-        </div>
-        <div
-          onClick={() => setSelected("kurzgesagt")}
-          className={`${
-            selected === "kurzgesagt"
-              ? "bg-gray-600 text-white"
-              : "text-gray-400"
-          } cursor-pointer p-[4px] rounded-md w-[150px] border border-gray-700`}
-        >
-          Kurzgesagt
-        </div>
-      </div>
-      <div className="bg-[#1b1b1b] shadow-sm flex flex-col text-start z-[1000] w-full max-w-[700px] mx-auto relative border-[rgba(40,40,40,.9)] rounded-md border">
+    <div
+      onClick={onClose}
+      className="fixed bg-black/40 w-screen h-screen top-0 left-0 flex justify-center items-center"
+    >
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        className="bg-[#1b1b1b] shadow-sm flex flex-col text-start z-[1000] w-full max-w-[700px] mx-auto relative border-[rgba(40,40,40,.9)] rounded-md border"
+      >
         {!chats?.length ? (
           <div className="w-full border-b p-[8px] flex items-center border-[rgba(40,40,40)]">
             <input
@@ -314,7 +436,7 @@ const BotBoddy = () => {
               placeholder="Ask me something"
             />
             <button
-              onClick={!loading ? () => handleSearch(search) : undefined}
+              disabled
               className="bg-[rgb(133,89,244)] text-sm px-[8px] rounded-md"
             >
               Ask
@@ -329,7 +451,7 @@ const BotBoddy = () => {
               Quickstarts
             </span>
             <div className="flex flex-col gap-[4px] max-h-[400px]">
-              {Faqs[selected].map((faq, key) => (
+              {faqs.map((faq, key) => (
                 <div
                   key={key}
                   onClick={() => {
@@ -541,6 +663,6 @@ const BotBoddy = () => {
           ""
         )}
       </div>
-    </>
+    </div>
   );
 };
