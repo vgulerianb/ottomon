@@ -104,6 +104,17 @@ export async function GET(req: Request) {
     where: {
       created_by: user?.email,
     },
+    select: {
+      project_name: true,
+      project_id: true,
+      status: true,
+      created_at: true,
+      faqs: {
+        select: {
+          questions: true,
+        },
+      },
+    },
   });
   console.log({ projects });
   return NextResponse.json({
