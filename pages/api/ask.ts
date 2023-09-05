@@ -139,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
       {
         project_id: projectId,
         query_embedding: embedding,
-        similarity_threshold: 0.5,
+        similarity_threshold: 0.7,
         match_count: 6,
       }
     );

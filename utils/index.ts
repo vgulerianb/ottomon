@@ -1,70 +1,65 @@
-import { decode, encode } from "gpt-tokenizer";
-
 const openAiHandler = async (
+  prisma: any,
   query: string,
-  variant: string,
-  instructions?: string
+  project_id: string
 ) => {
-  let encoded = encode(query);
-  query = "";
+  try {
+    const message = [
+      {
+        role: "system",
+        content: `You are a human educator and generates 3 possible faqs  for every query. Do not give answers to the questions. Reply the questions as a array. Example response, ["question1","question2","question3"]`,
+      },
+      {
+        role: "user",
+        content: `This Phone has 3 Secret Tricks!
+this is the Vivo v29 and there's three really special things about it for starters with this design Viva made over 1400 manual adjustments to magnetic fields to create this particular texture that you can see here there are 15 million particles per phone with the angle of each precisely tuned to get the right graduations of light and shadows second is the auralite with smart color temperature adjustments to help you easily take portrait shots in low light and night environments it's like a flash but just with nine times the light emitting area which basically makes it much softer and more sculpted light but also it can detect the color temperature of the room you're in and adjust its own color temperature to match so that your face looks clear soft and bright but as if you haven't even used a flash the third is that the selfie camera is wide enough to fit the entire group in while being 50 megapixels in resolution so selfies look almost like they've been taken on the rear set of cameras`,
+      },
+      {
+        role: "assistant",
+        content: `[ "What are some unique design features of the Vivo v29?","How does the auralite technology in the Vivo v29 improve low light photography?", "What are the advantages of the wide-angle selfie camera on the Vivo v29?"]`,
+      },
+      {
+        role: "user",
+        content: `DoodleTale | buildspace nights & weekends s3
+Transforming children's creative designs into immersive stories, complete with educational quizzes and engaging mini-games! 
+🔴 spectreseek meet DoodleTale. meet DoodleTale. meet DoodleTale. Transforming children's creative designs into immersive stories, complete with educational quizzes and engaging mini-games! Transforming children's creative designs into immersive stories, complete with educational quizzes and engaging mini-games! Transforming children's creative designs into immersive stories, complete with educational quizzes and engaging mini-games! say hi say hi discord: MariusS#9741       buildspace     spectate s4 is in progress buildspace we raised 10M from a16z and others.       we raised 10M from a16z and others.           we raised 10M from a16z and others. `,
+      },
+      {
+        role: "assistant",
+        content: `["What is DoodleTale?","What does DoodleTale do with children's creative designs?","Can you provide more information about buildspace and its funding?"]`,
+      },
+      {
+        role: "user",
+        content: query,
+      },
+    ];
 
-  if (encoded?.length > 10000) {
-    encoded = encoded.slice(0, 10000);
+    const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo-16k",
+        messages: message,
+        max_tokens: 1800,
+        temperature: 0.4,
+        stream: false,
+      }),
+    });
+    const data = await response.json();
+
+    if (data?.choices?.[0]?.message?.content)
+      await prisma.faqs.create({
+        data: {
+          project_id: project_id,
+          questions: JSON.parse(data?.choices?.[0]?.message?.content ?? null),
+        },
+      });
+  } catch (e) {
+    console.log(e);
   }
-  const decoded = await decode(encoded);
-  const tweetExample = [
-    {
-      role: "user",
-      content: "Example",
-    },
-    {
-      role: "assistant",
-      content: "['Tweet1', 'Tweet2']",
-    },
-    {
-      role: "user",
-      content: `A new PostgreSQL extension is now available in Supabase: pgvector, an open-source vector similarity search. The exponential progress of AI functionality over the past year has inspired many new real world applications. One specific challenge has been the ability to store and query embeddings at scale. In this post we'll explain what embeddings are, why we might want to use them, and how we can store and query them in PostgreSQL using pgvector.`,
-    },
-    {
-      role: "assistant",
-      content: `["🚀 Exciting news! 🎉 Supabase has just released a new PostgreSQL extension called pgvector! 🐘 It's an open-source vector similarity search that enables storing and querying of embeddings at scale. Let's dive in to learn more about this game-changing technology! #AI #PostgreSQL #pgvector", "🔎 What are embeddings, you ask? Embeddings are dense numerical representations of data that capture its semantic meaning. They have been crucial in various AI applications such as natural language processing and computer vision. #AI #Embeddings #pgvector", "💡 With the exponential progress in AI functionality, the demand for storing and querying embeddings at scale has increased. That's where pgvector comes in. It allows you to efficiently store and search vector embeddings directly in PostgreSQL 🐘. Say goodbye to performance bottlenecks! #pgvector #PostgreSQL", "🔍 Wondering how to get started with pgvector? It's as easy as installing the extension and creating a pgvector column on your table. Just a few simple steps, and you're ready to store and query your vector embeddings at lightning speed! ⚡️ #pgvector #AI #PostgreSQL", "🎯 Whether you're working on recommendation systems, image recognition, or any AI application that requires similarity search, pgvector and Supabase have got your back! Say hello to efficient, scalable, and lightning-fast vector similarity search with pgvector! 🚀 #pgvector #Supabase"]`,
-    },
-  ];
-
-  const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo-16k",
-      messages: [
-        {
-          role: "system",
-          content:
-            variant === "blog"
-              ? `You are a highly efficient assistant specializing in converting user information into engaging, viral SEO-friendly detailed blog posts. Adhering to the key structure of a blog post - including Heading 1, Introduction, Body, and End notes - you weave compelling narratives without deviating from the facts provided in the input text. Please ensure responses are returned in markdown format.`
-              : `You are a highly efficient assistant that can turn user input into a concise, engaging viral tweet thread. While aiming to include all key information, keep the thread to a maximum of 5 tweets. Please formulate responses in this format ["Tweet1", "Tweet2"].`,
-        },
-        ...(variant === "tweet" ? tweetExample : []),
-        {
-          role: "user",
-          content: `${
-            instructions
-              ? `Instructions given by user: ${instructions}\n Content:\n`
-              : ""
-          }${decoded}`,
-        },
-      ],
-      max_tokens: 1800,
-      temperature: 0.4,
-      stream: false,
-    }),
-  });
-  const data = await response.json();
-
-  return data?.choices?.[0]?.message?.content ?? null;
 };
 
 export { openAiHandler };

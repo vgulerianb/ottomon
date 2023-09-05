@@ -6,6 +6,7 @@ import {
 } from "@/app/services/ottomon.service";
 import { verifyToken } from "@/app/services/verifyToken";
 import { prisma } from "@/prisma/db";
+import { openAiHandler } from "@/utils";
 import { NextResponse } from "next/server";
 const { v4: uuidv4 } = require("uuid");
 const ytpl = require("ytpl");
@@ -81,6 +82,11 @@ export async function POST(req: Request) {
     .catch((error) => {
       console.log("error", error);
     });
+  await openAiHandler(
+    prisma,
+    finalResponse?.[0]?.content + finalResponse?.[1]?.content,
+    projectId
+  );
   return NextResponse.json({
     finalResponse: finalResponse?.length,
     timeTakenToRespond: Date.now() - startTime,
