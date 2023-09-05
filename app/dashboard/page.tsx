@@ -46,6 +46,13 @@ export default function Home() {
   const [urlsFound, setUrlsFound] = useState<number>(0);
 
   useEffect(() => {
+    setProjectName("");
+    setProjectType("website");
+    setUrl("");
+    setUrlsFound(0);
+  }, [addModal]);
+
+  useEffect(() => {
     getProjects();
   }, []);
 
