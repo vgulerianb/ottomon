@@ -70,6 +70,8 @@ export const getYoutubeCaptions = async (youtubeUrl) => {
   let content = await getSubtitles({
     videoID: videoID,
     lang: "en",
+  }).catch((e) => {
+    console.log("error getting captions", e);
   });
   content = content.map((c: any) => c.text).join(" ");
   return content;
@@ -145,7 +147,7 @@ export const YoutubeChannelId = async (youtubeUrl) => {
 
         res.on("end", () => {
           const channelMatch = data.match(/"channelId":"(.*?)"/);
-
+          console.log({ data });
           if (channelMatch && channelMatch[1]) {
             resolve(channelMatch[1]);
           } else {
