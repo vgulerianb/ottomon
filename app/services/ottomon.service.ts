@@ -63,18 +63,22 @@ export const getUrls = async (url, urlMap = {}, depth = 0) => {
 };
 
 export const getYoutubeCaptions = async (youtubeUrl) => {
-  console.log({ youtubeUrl });
-  if (!youtubeUrl) return;
-  const videoID = new URL(youtubeUrl).searchParams.get("v");
-  if (!videoID) return;
-  let content = await getSubtitles({
-    videoID: videoID,
-    lang: "en",
-  }).catch((e) => {
-    console.log("error getting captions", e);
-  });
-  content = content.map((c: any) => c.text).join(" ");
-  return content;
+  try {
+    console.log({ youtubeUrl });
+    if (!youtubeUrl) return;
+    const videoID = new URL(youtubeUrl).searchParams.get("v");
+    if (!videoID) return;
+    let content = await getSubtitles({
+      videoID: videoID,
+      lang: "en",
+    }).catch((e) => {
+      console.log("error getting captions", e);
+    });
+    content = content.map((c: any) => c.text).join(" ");
+    return content;
+  } catch (e) {
+    console.log("error", e);
+  }
 };
 
 export const getGitHubRepoFiles = async (githubUrl) => {
@@ -146,10 +150,17 @@ export const YoutubeChannelId = async (youtubeUrl) => {
         });
 
         res.on("end", () => {
-          const channelMatch = data.match(/"channelId":"(.*?)"/);
-          console.log({ data });
-          if (channelMatch && channelMatch[1]) {
-            resolve(channelMatch[1]);
+          // const channelMatch = data.match(/"channelId":"(.*?)"/);
+          const regex = /"channelId":"(.*?)"/g;
+          const matches = [];
+          let match;
+
+          while ((match = regex.exec(data)) !== null) {
+            matches.push(match[1]);
+          }
+
+          if (matches[0]) {
+            resolve(matches[matches.length - 1]);
           } else {
             reject(new Error("Channel ID not found"));
           }
