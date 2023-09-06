@@ -152,8 +152,8 @@ export const YoutubeChannelId = async (youtubeUrl) => {
         res.on("end", () => {
           // const channelMatch = data.match(/"channelId":"(.*?)"/);
           const regex = /"channelId":"(.*?)"/g;
-          const matches = [];
-          let match;
+          const matches = [] as string[];
+          let match = null as null | string[];
 
           while ((match = regex.exec(data)) !== null) {
             matches.push(match[1]);
