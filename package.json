@@ -35,7 +35,7 @@
     "node-fetch": "^3.3.2",
     "openai": "^3.2.1",
     "openai-edge": "^1.2.1",
-    "ottomon": "^0.1.0-b",
+    "ottomon": "^0.1.1",
     "postcss": "8.4.27",
     "react": "18.2.0",
     "react-dom": "18.2.0",

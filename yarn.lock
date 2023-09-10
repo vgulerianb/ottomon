@@ -9029,10 +9029,10 @@ optionator@^0.9.3:
     prelude-ls "^1.2.1"
     type-check "^0.4.0"
 
-ottomon@^0.1.0-b:
-  version "0.1.0-b"
-  resolved "https://registry.yarnpkg.com/ottomon/-/ottomon-0.1.0-b.tgz#56165dde270ffe060148e0e35af0dc2d3787bb14"
-  integrity sha512-4pWUUje0wetb7voFs+OZu0MXuokJP+GnY9g6dxEFcssMxohZGrG8Pj+S3Hhzr+qk0hqx4WhXb8ZOwbVefW2ilQ==
+ottomon@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/ottomon/-/ottomon-0.1.1.tgz#26c8feb8d618df0ef74b07bf998e692fb2e7baa1"
+  integrity sha512-oLSSlFBGgAIr20KD77DiA/nl2foeqUzC3QpQPnPzb8LzIT/Nioi1d6IvOKX90hu4DPo5fMuX14+GbvAavj316w==
   dependencies:
     "@types/react" "^18.2.21"
     "@types/react-dom" "^18.2.7"
