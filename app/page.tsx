@@ -541,6 +541,13 @@ const BotBoddy = () => {
           ""
         )}
       </div>
+      <style>
+        {`
+          .markdownHolder li p {
+            display: contents !important;
+          }
+          `}
+      </style>
     </>
   );
 };

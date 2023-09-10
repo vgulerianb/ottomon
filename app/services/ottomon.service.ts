@@ -2,6 +2,7 @@ import axios from "axios";
 import { getSubtitles } from "youtube-captions-scraper";
 import { load } from "cheerio";
 import { createParser } from "eventsource-parser";
+import { createClient } from "@supabase/supabase-js";
 
 export const getUrls = async (url, urlMap = {}, depth = 0) => {
   let urlSet = new Set();
@@ -280,6 +281,10 @@ export const OpenAIstream = async (
   }
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
+  const supabaseClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? ""
+  );
 
   const stream = new ReadableStream({
     async start(controller) {

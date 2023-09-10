@@ -357,7 +357,7 @@ const Input = (
 
 export const RenderCode = ({ children }: { children: any }) => {
   return (
-    <pre className="p-[8px]">
+    <pre className="">
       {children?.map((child: any, key: number) => {
         return (
           <code key={key}>

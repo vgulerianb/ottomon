@@ -481,7 +481,7 @@ const BotBoddy = ({
                   handleSearch(search);
                 }
               }}
-              className="w-full h-full bg-transparent outline-none text-white placeholder-gray-500/80"
+              className="w-full h-full bg-transparent outline-none text-white placeholder-gray-500/80 text-sm"
               placeholder="Ask me something"
             />
             <button
@@ -699,7 +699,7 @@ const BotBoddy = ({
                   handleSearch(search);
                 }
               }}
-              className="w-full h-full bg-transparent outline-none text-white placeholder-gray-500/80"
+              className="w-full h-full bg-transparent text-sm outline-none text-white placeholder-gray-500/80"
               placeholder="Ask me something"
             />
             <button
@@ -713,6 +713,9 @@ const BotBoddy = ({
         ) : (
           ""
         )}
+        <div className="flex text-xs justify-center items-center py-[4px]">
+          Powered by Ottomon
+        </div>
       </div>
     </div>
   );

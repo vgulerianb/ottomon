@@ -28,7 +28,7 @@ body {
 
 /* if p is inside li */
 .markdownHolder li p {
-  @apply mb-[0px];
+  @apply mb-[0px] contents;
 }
 
 .markdownHolder ol {
