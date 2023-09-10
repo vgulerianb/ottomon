@@ -380,7 +380,6 @@ const BotBoddy = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [answer, setAnswer] = useState<string>("");
   const [chats, setChats] = useState<any[]>([]);
-  const [value, setValue] = useState<string>("");
   const [search, setSearch] = useState("");
   const scrollToBottom = () => {
     const chatsHolder = document.querySelector(".chatsHolder");
@@ -388,15 +387,18 @@ const BotBoddy = ({
       chatsHolder.scrollTop = chatsHolder.scrollHeight;
     }
   };
-  const [selected, setSelected] = useState<string>("buildspace");
-  const [url, setUrl] = useState<string>("");
+  const [session, setSession] = useState<string>("");
 
   useEffect(() => {
+    if (session === "") {
+      setSession(Math.random().toString(36).substring(7) + Date.now());
+    }
     setChats([]);
-  }, [selected]);
+  }, []);
 
   const handleSearch = async (val) => {
     if (loading) return;
+    scrollToBottom();
     const searchValue = val || search.trim();
     setSearch("");
     setChats((prev) => [
@@ -418,6 +420,12 @@ const BotBoddy = ({
         {
           query: searchValue,
           projectId: projectId,
+          sessionId: session,
+          history:
+            chats?.map((chat) => ({
+              role: chat?.isSender ? "user" : "assistant",
+              content: chat?.msg,
+            })) || [],
         },
         {
           onDownloadProgress: (progressEvent: any) => {
@@ -461,7 +469,7 @@ const BotBoddy = ({
         onClick={(e) => {
           e.stopPropagation();
         }}
-        className="bg-[#1b1b1b] shadow-sm flex flex-col text-start z-[1000] w-full max-w-[700px] mx-auto relative border-[rgba(40,40,40,.9)] rounded-md border"
+        className="bg-[#1b1b1b] mx-[8px] shadow-sm flex flex-col text-start z-[1000] w-full max-w-[650px] relative border-[rgba(40,40,40,.9)] rounded-md border"
       >
         {!chats?.length ? (
           <div className="w-full border-b p-[8px] flex items-center border-[rgba(40,40,40)]">
@@ -510,7 +518,7 @@ const BotBoddy = ({
         ) : (
           ""
         )}
-        <div className="max-h-[600px] h-full overflow-scroll">
+        <div className="max-h-[500px] h-full overflow-scroll chatsHolder">
           {chats?.length ? (
             <div className="flex flex-col gap-[8px] p-[16px]">
               {chats.map((chat, index) =>
@@ -568,118 +576,119 @@ const BotBoddy = ({
           ) : (
             ""
           )}
-        </div>
-        {loading && answer === "" ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "16px",
-              textAlign: "center",
-              color: "#ffffff",
-              paddingTop: "16px",
-              paddingBottom: "16px",
-              fontSize: "14px",
-              borderTop: `1px solid rgba(255, 255, 255, 0.6)`,
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="48px"
-              height="48px"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="xMidYMid"
+          {loading && answer === "" ? (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "16px",
+                textAlign: "center",
+                color: "#ffffff",
+                paddingTop: "16px",
+                paddingBottom: "16px",
+                fontSize: "14px",
+                borderTop: `1px solid rgba(255, 255, 255, 0.6)`,
+              }}
             >
-              <g>
-                <circle cx="60" cy="50" r="4" fill="#7cb9e8">
-                  <animate
-                    attributeName="cx"
-                    repeatCount="indefinite"
-                    dur="0.9900990099009901s"
-                    values="95;35"
-                    keyTimes="0;1"
-                    begin="-0.6767000000000001s"
-                  ></animate>
-                  <animate
-                    attributeName="fill-opacity"
-                    repeatCount="indefinite"
-                    dur="0.9900990099009901s"
-                    values="0;1;1"
-                    keyTimes="0;0.2;1"
-                    begin="-0.6767000000000001s"
-                  ></animate>
-                </circle>
-                <circle cx="60" cy="50" r="4" fill="#7cb9e8">
-                  <animate
-                    attributeName="cx"
-                    repeatCount="indefinite"
-                    dur="0.9900990099009901s"
-                    values="95;35"
-                    keyTimes="0;1"
-                    begin="-0.33330000000000004s"
-                  ></animate>
-                  <animate
-                    attributeName="fill-opacity"
-                    repeatCount="indefinite"
-                    dur="0.9900990099009901s"
-                    values="0;1;1"
-                    keyTimes="0;0.2;1"
-                    begin="-0.33330000000000004s"
-                  ></animate>
-                </circle>
-                <circle cx="60" cy="50" r="4" fill="#7cb9e8">
-                  <animate
-                    attributeName="cx"
-                    repeatCount="indefinite"
-                    dur="0.9900990099009901s"
-                    values="95;35"
-                    keyTimes="0;1"
-                    begin="0s"
-                  ></animate>
-                  <animate
-                    attributeName="fill-opacity"
-                    repeatCount="indefinite"
-                    dur="0.9900990099009901s"
-                    values="0;1;1"
-                    keyTimes="0;0.2;1"
-                    begin="0s"
-                  ></animate>
-                </circle>
-              </g>
-              <g transform="translate(-15 0)">
-                <path
-                  d="M50 50L20 50A30 30 0 0 0 80 50Z"
-                  fill="#1e88e5"
-                  transform="rotate(90 50 50)"
-                ></path>
-                <path d="M50 50L20 50A30 30 0 0 0 80 50Z" fill="#1e88e5">
-                  <animateTransform
-                    attributeName="transform"
-                    type="rotate"
-                    repeatCount="indefinite"
-                    dur="0.9900990099009901s"
-                    values="0 50 50;45 50 50;0 50 50"
-                    keyTimes="0;0.5;1"
-                  ></animateTransform>
-                </path>
-                <path d="M50 50L20 50A30 30 0 0 1 80 50Z" fill="#1e88e5">
-                  <animateTransform
-                    attributeName="transform"
-                    type="rotate"
-                    repeatCount="indefinite"
-                    dur="0.9900990099009901s"
-                    values="0 50 50;-45 50 50;0 50 50"
-                    keyTimes="0;0.5;1"
-                  ></animateTransform>
-                </path>
-              </g>
-            </svg>{" "}
-            Searching. This may take a second!
-          </div>
-        ) : (
-          ""
-        )}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="48px"
+                height="48px"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="xMidYMid"
+              >
+                <g>
+                  <circle cx="60" cy="50" r="4" fill="#7cb9e8">
+                    <animate
+                      attributeName="cx"
+                      repeatCount="indefinite"
+                      dur="0.9900990099009901s"
+                      values="95;35"
+                      keyTimes="0;1"
+                      begin="-0.6767000000000001s"
+                    ></animate>
+                    <animate
+                      attributeName="fill-opacity"
+                      repeatCount="indefinite"
+                      dur="0.9900990099009901s"
+                      values="0;1;1"
+                      keyTimes="0;0.2;1"
+                      begin="-0.6767000000000001s"
+                    ></animate>
+                  </circle>
+                  <circle cx="60" cy="50" r="4" fill="#7cb9e8">
+                    <animate
+                      attributeName="cx"
+                      repeatCount="indefinite"
+                      dur="0.9900990099009901s"
+                      values="95;35"
+                      keyTimes="0;1"
+                      begin="-0.33330000000000004s"
+                    ></animate>
+                    <animate
+                      attributeName="fill-opacity"
+                      repeatCount="indefinite"
+                      dur="0.9900990099009901s"
+                      values="0;1;1"
+                      keyTimes="0;0.2;1"
+                      begin="-0.33330000000000004s"
+                    ></animate>
+                  </circle>
+                  <circle cx="60" cy="50" r="4" fill="#7cb9e8">
+                    <animate
+                      attributeName="cx"
+                      repeatCount="indefinite"
+                      dur="0.9900990099009901s"
+                      values="95;35"
+                      keyTimes="0;1"
+                      begin="0s"
+                    ></animate>
+                    <animate
+                      attributeName="fill-opacity"
+                      repeatCount="indefinite"
+                      dur="0.9900990099009901s"
+                      values="0;1;1"
+                      keyTimes="0;0.2;1"
+                      begin="0s"
+                    ></animate>
+                  </circle>
+                </g>
+                <g transform="translate(-15 0)">
+                  <path
+                    d="M50 50L20 50A30 30 0 0 0 80 50Z"
+                    fill="#1e88e5"
+                    transform="rotate(90 50 50)"
+                  ></path>
+                  <path d="M50 50L20 50A30 30 0 0 0 80 50Z" fill="#1e88e5">
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      repeatCount="indefinite"
+                      dur="0.9900990099009901s"
+                      values="0 50 50;45 50 50;0 50 50"
+                      keyTimes="0;0.5;1"
+                    ></animateTransform>
+                  </path>
+                  <path d="M50 50L20 50A30 30 0 0 1 80 50Z" fill="#1e88e5">
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      repeatCount="indefinite"
+                      dur="0.9900990099009901s"
+                      values="0 50 50;-45 50 50;0 50 50"
+                      keyTimes="0;0.5;1"
+                    ></animateTransform>
+                  </path>
+                </g>
+              </svg>{" "}
+              Searching. This may take a second!
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
+
         {chats?.length ? (
           <div className="w-full border-t p-[8px] flex items-center border-[rgba(40,40,40)]">
             <input
