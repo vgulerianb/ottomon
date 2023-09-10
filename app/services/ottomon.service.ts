@@ -82,6 +82,7 @@ export const getYoutubeCaptions = async (youtubeUrl) => {
 };
 
 export const getGitHubRepoFiles = async (githubUrl) => {
+  console.log({ githubUrl });
   // Parse the GitHub repository URL to extract the owner and repo name.
   const urlParts = githubUrl.split("/");
   const owner = urlParts[3];
@@ -171,3 +172,59 @@ export const YoutubeChannelId = async (youtubeUrl) => {
       });
   });
 };
+
+export const getGitHubRepoContent = async (
+  urlMeta: {
+    fileUrl: string;
+    url: string;
+    content: string;
+  }[]
+) => {
+  let readme = {
+    fileUrl: "",
+    url: "",
+    content: "",
+  };
+
+  const finalResponse = [] as {
+    fileUrl: string;
+    content: string;
+    url: string;
+  }[];
+  for (let i = 0; i < urlMeta?.length; i++) {
+    const item = urlMeta[i];
+    const content = await axios.get(item?.fileUrl).catch((e) => {
+      console.log("error", e);
+    });
+    if (!content?.data) continue;
+    if (!hasUnicode(String(content?.data))) {
+      if (item?.fileUrl?.includes("README.md")) {
+        readme = {
+          ...item,
+          content:
+            `File Path: ${item?.fileUrl?.replace(
+              "https://raw.githubusercontent.com",
+              "https://github.com/tree"
+            )}` +
+              "\n" +
+              String(content?.data) || "",
+        };
+      } else
+        finalResponse[i] = {
+          ...item,
+          content:
+            `File Path: ${item?.fileUrl?.replace(
+              "https://raw.githubusercontent.com",
+              "https://github.com/tree"
+            )}` +
+              "\n" +
+              String(content?.data) || "",
+        };
+    }
+  }
+  return [readme, ...finalResponse];
+};
+
+function hasUnicode(s) {
+  return /[^\u0000-\u007f]/.test(s);
+}

@@ -44,7 +44,7 @@ Transforming children's creative designs into immersive stories, complete with e
         model: "gpt-3.5-turbo-16k",
         messages: message,
         max_tokens: 1800,
-        temperature: 0.4,
+        temperature: 0.1,
         stream: false,
       }),
     });

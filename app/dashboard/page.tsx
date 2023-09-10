@@ -7,6 +7,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Loading from "../components/SvgComps/loading";
+import { getGitHubRepoFiles } from "../services/ottomon.service";
 
 const Faqs = {
   buildspace: [
@@ -44,6 +45,13 @@ export default function Home() {
   const [url, setUrl] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [urlsFound, setUrlsFound] = useState<number>(0);
+  const [urlMeta, setUrlMeta] = useState<
+    {
+      content: string;
+      fileUrl: string;
+      url: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     if (!addModal) return;
@@ -51,6 +59,7 @@ export default function Home() {
     setProjectType("website");
     setUrl("");
     setUrlsFound(0);
+    setUrlMeta([]);
   }, [addModal]);
 
   useEffect(() => {
@@ -72,33 +81,40 @@ export default function Home() {
 
   const createNewProject = async () => {
     setLoading(true);
-    await axios
-      .post(
-        "/otto-api/project",
-        {
-          name: projectName,
-          type: projectType,
-          url: url,
-        },
-        {
-          headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+
+    setTimeout(async () => {
+      await axios
+        .post(
+          "/otto-api/project",
+          {
+            name: projectName,
+            type: projectType,
+            url: url,
+            urlMeta:
+              projectType === "github"
+                ? await getGitHubRepoFiles(url)
+                : undefined,
           },
-        }
-      )
-      .then((res) => {
-        console.log(res);
-        setUrlsFound(res?.data?.finalResponse);
-        getProjects();
-        setTimeout(() => {
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+          setUrlsFound(res?.data?.finalResponse);
+          getProjects();
+          setTimeout(() => {
+            setLoading(false);
+          }, 60000);
+        })
+        .catch((err) => {
+          console.log(err);
           setLoading(false);
-        }, 60000);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
-    setAddModal(false);
+        });
+      setAddModal(false);
+    });
   };
 
   return (
@@ -168,10 +184,25 @@ export default function Home() {
                     <img src="/you.png" width={32} height={32} alt="ottomon" />
                     <span className="text-white/70 text-sm">Youtube</span>
                   </div>
+                  <div
+                    onClick={() => {
+                      setProjectType("github");
+                    }}
+                    className={`py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border ${
+                      projectType === "github"
+                        ? "border-white"
+                        : "border-gray-700"
+                    } cursor-pointer`}
+                  >
+                    <img src="/you.png" width={32} height={32} alt="ottomon" />
+                    <span className="text-white/70 text-sm">Github</span>
+                  </div>
                 </div>
                 <span className="text-xs text-white/80 mt-[16px] uppercase">
                   {projectType === "website"
                     ? "Website Url"
+                    : projectType === "github"
+                    ? "Github repo url"
                     : "Youtube channel url"}
                 </span>
                 <input
@@ -182,6 +213,8 @@ export default function Home() {
                   placeholder={
                     projectType === "website"
                       ? "https://buildspace.io"
+                      : projectType === "github"
+                      ? "https://github.com/vgulerianb/ottomon"
                       : "https://youtube.com/channel/83883"
                   }
                   className="text-white/70 mt-[4px] outline-none w-full border-gray-700 border p-[4px] bg-black text-xs h-[32px] rounded-md"
@@ -477,64 +510,65 @@ const BotBoddy = ({
         ) : (
           ""
         )}
-
-        {chats?.length ? (
-          <div className="flex flex-col gap-[8px] p-[16px]">
-            {chats.map((chat, index) =>
-              !loading ||
-              answer !== "" ||
-              chats?.length !== index + 1 ||
-              chat.isSender ? (
-                <div className="flex gap-[8px]">
-                  {!chat?.isSender ? (
-                    <Image
-                      src="/logo.png"
-                      width={32}
-                      height={32}
-                      alt="ottomon"
-                      className="h-[32px]"
+        <div className="max-h-[600px] h-full overflow-scroll">
+          {chats?.length ? (
+            <div className="flex flex-col gap-[8px] p-[16px]">
+              {chats.map((chat, index) =>
+                !loading ||
+                answer !== "" ||
+                chats?.length !== index + 1 ||
+                chat.isSender ? (
+                  <div className="flex gap-[8px]">
+                    {!chat?.isSender ? (
+                      <Image
+                        src="/logo.png"
+                        width={32}
+                        height={32}
+                        alt="ottomon"
+                        className="h-[32px]"
+                      />
+                    ) : (
+                      <div className="flex justify-center items-center border border-white/60 w-[32px] h-[32px] min-w-[32px] rounded-full">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          fill="none"
+                          stroke="#fff"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                      </div>
+                    )}
+                    <ReactMarkdown
+                      className={`markdownHolder overflow-scroll`}
+                      children={
+                        (answer !== "" && index === chats.length - 1
+                          ? answer
+                          : chat?.msg?.includes?.("[DISCLAIMER]")
+                          ? chat?.msg?.replace?.("[DISCLAIMER]", "")
+                          : chat?.msg
+                        )?.split("+Sources+")[0]
+                      }
+                      components={{
+                        pre: (props: any) => <RenderCode {...props} />,
+                      }}
                     />
-                  ) : (
-                    <div className="flex justify-center items-center border border-white/60 w-[32px] h-[32px] min-w-[32px] rounded-full">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        fill="none"
-                        stroke="#fff"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.5"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
-                    </div>
-                  )}
-                  <ReactMarkdown
-                    className={`markdownHolder`}
-                    children={
-                      (answer !== "" && index === chats.length - 1
-                        ? answer
-                        : chat?.msg?.includes?.("[DISCLAIMER]")
-                        ? chat?.msg?.replace?.("[DISCLAIMER]", "")
-                        : chat?.msg
-                      )?.split("+Sources+")[0]
-                    }
-                    components={{
-                      pre: (props: any) => <RenderCode {...props} />,
-                    }}
-                  />
-                </div>
-              ) : (
-                ""
-              )
-            )}
-          </div>
-        ) : (
-          ""
-        )}
+                  </div>
+                ) : (
+                  ""
+                )
+              )}
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
         {loading && answer === "" ? (
           <div
             style={{

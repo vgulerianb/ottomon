@@ -1,6 +1,6 @@
 import {
   YoutubeChannelId,
-  getGitHubRepoFiles,
+  getGitHubRepoContent,
   getUrls,
   getYoutubeCaptions,
 } from "@/app/services/ottomon.service";
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   console.log({ authHeader });
   const user = await verifyToken(authHeader);
   if (!user.success) return new Response("No user", { status: 401 });
-  const { name, url, type } = request;
+  const { name, url, type, urlMeta } = request;
   const startTime = Date.now();
   const projectId = uuidv4() + new Date().getTime();
   let finalResponse = [] as any;
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     }
     finalResponse = formattedPlaylist;
   } else if (type === "github") {
-    finalResponse = await getGitHubRepoFiles(url);
+    finalResponse = await getGitHubRepoContent(urlMeta);
   } else if (type === "website") {
     const websiteUrls = await getUrls(url);
     finalResponse = Object.values(websiteUrls?.urlMap || {});
@@ -64,6 +64,7 @@ export async function POST(req: Request) {
       project_name: name,
       created_by: user?.email,
       status: "active",
+      meta: type,
     },
   });
   await prisma.taskqueue

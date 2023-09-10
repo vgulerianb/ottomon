@@ -25,9 +25,7 @@ const OpenAIstream = async (
           role: "user",
           content: `You are a very enthusiastic Ottomon representative who loves
     to help people! Given the following sections from the documentation, answer the question using only that information,
-    outputted in markdown format. If you are unsure and the answer
-    is not explicitly written in the documentation, say
-    "Sorry, I don't know how to help with that."
+    outputted in markdown format. 
 
     Context sections:
     ${contextText}
@@ -139,7 +137,7 @@ const handler = async (req: Request): Promise<Response> => {
       {
         project_id: projectId,
         query_embedding: embedding,
-        similarity_threshold: 0.7,
+        similarity_threshold: 0.5,
         match_count: 6,
       }
     );
