@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import allowCors from "../../utils/allowCors";
-import { getChatSummary, OpenAIstream } from "@/app/services/ottomon.service";
+import { getChatSummary, OpenAIstream } from "@/app/services/openai.service";
 
 export const config = {
   runtime: "edge",
