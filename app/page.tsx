@@ -10,7 +10,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Magic } from "magic-sdk";
 import Loading from "./components/SvgComps/loading";
-import { Ottomon } from "ottomon";
 
 const Faqs = {
   buildspace: [
@@ -199,3 +198,356 @@ export default function Home() {
     </div>
   );
 }
+
+const BotBoddy = () => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [answer, setAnswer] = useState<string>("");
+  const [chats, setChats] = useState<any[]>([]);
+  const [value, setValue] = useState<string>("");
+  const [search, setSearch] = useState("");
+  const scrollToBottom = () => {
+    const chatsHolder = document.querySelector(".chatsHolder");
+    if (chatsHolder) {
+      chatsHolder.scrollTop = chatsHolder.scrollHeight;
+    }
+  };
+  const [selected, setSelected] = useState<string>("buildspace");
+  const [url, setUrl] = useState<string>("");
+
+  useEffect(() => {
+    setChats([]);
+  }, [selected]);
+
+  const handleSearch = async (val) => {
+    if (loading) return;
+    const searchValue = val || search.trim();
+    setSearch("");
+    setChats((prev) => [
+      ...prev,
+      {
+        msg: val || search,
+        isSender: true,
+      },
+      {
+        msg: "",
+        isSender: false,
+      },
+    ]);
+    setLoading(true);
+
+    await axios
+      .post(
+        "/otto-api/chat",
+        {
+          prompt: searchValue,
+          projectId: selected === "buildspace" ? "bs-1782" : "",
+        },
+        {
+          onDownloadProgress: (progressEvent: any) => {
+            console.log({ progressEvent });
+            if (progressEvent?.event?.target?.response)
+              setAnswer(progressEvent?.event?.target?.response);
+          },
+        }
+      )
+      .then((response) => {
+        setAnswer(response?.data);
+      })
+      .catch(() => {
+        setAnswer("Something went wrong, please try again later.");
+      });
+    setLoading(false);
+    setTimeout(() => {
+      setAnswer("");
+    });
+  };
+
+  const resetChat = () => {
+    setChats([]);
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+    if (answer !== "") {
+      let tempChats = [...chats];
+      tempChats[tempChats.length - 1].msg = answer;
+      setChats(tempChats);
+    }
+  }, [answer, loading]);
+
+  return (
+    <>
+      <div className="flex gap-[8px] items-center justify-center my-[16px]">
+        <div
+          onClick={() => setSelected("buildspace")}
+          className={`${
+            selected === "buildspace"
+              ? "bg-gray-600 text-white"
+              : "text-gray-400"
+          } cursor-pointer p-[4px] rounded-md w-[150px] border border-gray-700`}
+        >
+          Buildspace
+        </div>
+        <div
+          onClick={() => setSelected("kurzgesagt")}
+          className={`${
+            selected === "kurzgesagt"
+              ? "bg-gray-600 text-white"
+              : "text-gray-400"
+          } cursor-pointer p-[4px] rounded-md w-[150px] border border-gray-700`}
+        >
+          Kurzgesagt
+        </div>
+      </div>
+      <div className="bg-[#1b1b1b] shadow-sm flex flex-col text-start z-[1000] w-full max-w-[700px] mx-auto relative border-[rgba(40,40,40,.9)] rounded-md border">
+        {!chats?.length ? (
+          <div className="w-full border-b p-[8px] flex items-center border-[rgba(40,40,40)]">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch(search);
+                }
+              }}
+              className="w-full h-full bg-transparent outline-none text-white placeholder-gray-500/80"
+              placeholder="Ask me something"
+            />
+            <button
+              onClick={!loading ? () => handleSearch(search) : undefined}
+              className="bg-[rgb(133,89,244)] text-sm px-[8px] rounded-md"
+            >
+              Ask
+            </button>
+          </div>
+        ) : (
+          ""
+        )}
+        {!chats?.length ? (
+          <div className="p-[8px]">
+            <span className="leading-[20px] font-[400] text-[rgb(112,112,112)] text-[14px]">
+              Quickstarts
+            </span>
+            <div className="flex flex-col gap-[4px] max-h-[400px]">
+              {Faqs[selected].map((faq, key) => (
+                <div
+                  key={key}
+                  onClick={() => {
+                    setSearch(faq);
+                    handleSearch(faq);
+                  }}
+                  className="flex gap-[8px] p-[8px] hover:bg-[#323232] cursor-pointer rounded-md text-sm"
+                >
+                  <span>{`->`}</span>
+                  {faq}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          ""
+        )}
+
+        {chats?.length ? (
+          <div className="flex flex-col gap-[8px] p-[16px]">
+            {chats.map((chat, index) =>
+              !loading ||
+              answer !== "" ||
+              chats?.length !== index + 1 ||
+              chat.isSender ? (
+                <div className="flex gap-[8px]">
+                  {!chat?.isSender ? (
+                    <Image
+                      src="/logo.png"
+                      width={32}
+                      height={32}
+                      alt="ottomon"
+                      className="h-[32px]"
+                    />
+                  ) : (
+                    <div className="flex justify-center items-center border border-white/60 w-[32px] h-[32px] min-w-[32px] rounded-full">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="#fff"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                    </div>
+                  )}
+                  <ReactMarkdown
+                    className={`markdownHolder`}
+                    children={
+                      (answer !== "" && index === chats.length - 1
+                        ? answer
+                        : chat?.msg?.includes?.("[DISCLAIMER]")
+                        ? chat?.msg?.replace?.("[DISCLAIMER]", "")
+                        : chat?.msg
+                      )?.split("+Sources+")[0]
+                    }
+                    components={{
+                      pre: (props: any) => <RenderCode {...props} />,
+                    }}
+                  />
+                </div>
+              ) : (
+                ""
+              )
+            )}
+          </div>
+        ) : (
+          ""
+        )}
+        {loading && answer === "" ? (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "16px",
+              textAlign: "center",
+              color: "#ffffff",
+              paddingTop: "16px",
+              paddingBottom: "16px",
+              fontSize: "14px",
+              borderTop: `1px solid rgba(255, 255, 255, 0.6)`,
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48px"
+              height="48px"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="xMidYMid"
+            >
+              <g>
+                <circle cx="60" cy="50" r="4" fill="#7cb9e8">
+                  <animate
+                    attributeName="cx"
+                    repeatCount="indefinite"
+                    dur="0.9900990099009901s"
+                    values="95;35"
+                    keyTimes="0;1"
+                    begin="-0.6767000000000001s"
+                  ></animate>
+                  <animate
+                    attributeName="fill-opacity"
+                    repeatCount="indefinite"
+                    dur="0.9900990099009901s"
+                    values="0;1;1"
+                    keyTimes="0;0.2;1"
+                    begin="-0.6767000000000001s"
+                  ></animate>
+                </circle>
+                <circle cx="60" cy="50" r="4" fill="#7cb9e8">
+                  <animate
+                    attributeName="cx"
+                    repeatCount="indefinite"
+                    dur="0.9900990099009901s"
+                    values="95;35"
+                    keyTimes="0;1"
+                    begin="-0.33330000000000004s"
+                  ></animate>
+                  <animate
+                    attributeName="fill-opacity"
+                    repeatCount="indefinite"
+                    dur="0.9900990099009901s"
+                    values="0;1;1"
+                    keyTimes="0;0.2;1"
+                    begin="-0.33330000000000004s"
+                  ></animate>
+                </circle>
+                <circle cx="60" cy="50" r="4" fill="#7cb9e8">
+                  <animate
+                    attributeName="cx"
+                    repeatCount="indefinite"
+                    dur="0.9900990099009901s"
+                    values="95;35"
+                    keyTimes="0;1"
+                    begin="0s"
+                  ></animate>
+                  <animate
+                    attributeName="fill-opacity"
+                    repeatCount="indefinite"
+                    dur="0.9900990099009901s"
+                    values="0;1;1"
+                    keyTimes="0;0.2;1"
+                    begin="0s"
+                  ></animate>
+                </circle>
+              </g>
+              <g transform="translate(-15 0)">
+                <path
+                  d="M50 50L20 50A30 30 0 0 0 80 50Z"
+                  fill="#1e88e5"
+                  transform="rotate(90 50 50)"
+                ></path>
+                <path d="M50 50L20 50A30 30 0 0 0 80 50Z" fill="#1e88e5">
+                  <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    repeatCount="indefinite"
+                    dur="0.9900990099009901s"
+                    values="0 50 50;45 50 50;0 50 50"
+                    keyTimes="0;0.5;1"
+                  ></animateTransform>
+                </path>
+                <path d="M50 50L20 50A30 30 0 0 1 80 50Z" fill="#1e88e5">
+                  <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    repeatCount="indefinite"
+                    dur="0.9900990099009901s"
+                    values="0 50 50;-45 50 50;0 50 50"
+                    keyTimes="0;0.5;1"
+                  ></animateTransform>
+                </path>
+              </g>
+            </svg>{" "}
+            Searching. This may take a second!
+          </div>
+        ) : (
+          ""
+        )}
+        {chats?.length ? (
+          <div className="w-full border-t p-[8px] flex items-center border-[rgba(40,40,40)]">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch(search);
+                }
+              }}
+              className="w-full h-full bg-transparent outline-none text-white placeholder-gray-500/80"
+              placeholder="Ask me something"
+            />
+            <button
+              onClick={!loading ? handleSearch : undefined}
+              disabled={loading}
+              className="bg-[rgb(133,89,244)] text-sm px-[8px] rounded-md"
+            >
+              Ask
+            </button>
+          </div>
+        ) : (
+          ""
+        )}
+      </div>
+      <style>
+        {`
+          .markdownHolder li p {
+            display: contents !important;
+          }
+          `}
+      </style>
+    </>
+  );
+};
