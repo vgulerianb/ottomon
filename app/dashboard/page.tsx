@@ -350,7 +350,17 @@ export default function Home() {
           </main>
         </div>
       </div>
-      {botActive ? <DetailsModal projectId={projectId} faqs={faqs} /> : ""}
+      {botActive ? (
+        <DetailsModal
+          projectId={projectId}
+          faqs={faqs}
+          onClose={() => {
+            setBotActive(false);
+          }}
+        />
+      ) : (
+        ""
+      )}
     </div>
   );
 }
@@ -358,12 +368,31 @@ export default function Home() {
 const DetailsModal = ({
   projectId,
   faqs,
+  onClose,
 }: {
   projectId: string;
   faqs: string[];
+  onClose: () => void;
 }) => {
   const [selected, setSelected] = useState<string>("playground");
   const [isActivated, setIsActivated] = useState<boolean>(false);
+  const [conversations, setConversations] = useState<any>({});
+
+  useEffect(() => {
+    getConversation();
+  }, [selected]);
+
+  const getConversation = async () => {
+    await axios
+      .get(`/otto-api/conversations?projectId=${projectId}`, {
+        headers: {
+          Authorization: `${localStorage.getItem("token")}`,
+        },
+      })
+      .then((res) => {
+        setConversations(res?.data?.conversation || {});
+      });
+  };
 
   return (
     <div className="fixed w-screen h-screen top-0 left-0 overflow-hidden flex justify-center items-center">
@@ -386,6 +415,9 @@ const DetailsModal = ({
             height={16}
             fill="none"
             className="cursor-pointer"
+            onClick={() => {
+              onClose();
+            }}
           >
             <path
               fill="#fff"
@@ -415,22 +447,23 @@ const DetailsModal = ({
             Conversations
           </div>
         </div>
-        <>
-          <span className="text-xs mt-[16px] flex justify-between items-center">
-            {/* Add instructions to use below code */}
-            Use below code to add ottomon to your website
-            <button
-              onClick={() => {
-                setIsActivated(true);
-              }}
-              className="h-[32px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
-            >
-              Try it out
-            </button>
-          </span>
-          <ReactMarkdown
-            className={`markdownHolder mt-0`}
-            children={` \`\`\`
+        {selected === "playground" ? (
+          <div className="flex flex-col overflow-scroll">
+            <span className="text-xs mt-[16px] flex justify-between items-center">
+              {/* Add instructions to use below code */}
+              Use below code to add ottomon to your website
+              <button
+                onClick={() => {
+                  setIsActivated(true);
+                }}
+                className="h-[32px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
+              >
+                Try it out
+              </button>
+            </span>
+            <ReactMarkdown
+              className={`markdownHolder mt-0`}
+              children={` \`\`\`
 import { useState } from "react";
 import { Ottomon } from "ottomon";
 
@@ -452,11 +485,24 @@ const MyOttomonBot = () => {
   </>
 }
             `}
-            components={{
-              pre: (props: any) => <RenderCode {...props} />,
-            }}
-          />
-        </>
+              components={{
+                pre: (props: any) => <RenderCode {...props} />,
+              }}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-[8px] mt-[16px] overflow-scroll">
+            {(Object.entries(conversations) as any).map(([key, val]) => (
+              <div
+                key={key}
+                className=" p-[16px] w-full rounded-md border border-gray-700 hover:border-white cursor-pointer bg-black"
+              >
+                {val?.length} messages on{" "}
+                {new Date(val?.[0]?.created_at).toLocaleDateString()}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

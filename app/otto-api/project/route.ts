@@ -101,6 +101,8 @@ export async function GET(req: Request) {
   console.log({ authHeader });
   const user = await verifyToken(authHeader);
   console.log({ user });
+  if (!user.success) return new Response("No user", { status: 401 });
+
   const projects = await prisma.projects.findMany({
     where: {
       created_by: user?.email,
