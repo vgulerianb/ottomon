@@ -16,16 +16,6 @@ export default function Home() {
   const [botActive, setBotActive] = useState<boolean>(false);
   const [faqs, setFaqs] = useState<string[]>([]);
   const [projectId, setProjectId] = useState<string>("");
-  const router = useRouter();
-  const [projects, setProjects] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (localStorage.getItem("token")) return;
-    else {
-      router.push("/");
-    }
-  }, []);
-
   const [projectName, setProjectName] = useState<string>("");
   const [projectType, setProjectType] = useState<string>("website");
   const [url, setUrl] = useState<string>("");
@@ -38,6 +28,15 @@ export default function Home() {
       url: string;
     }[]
   >([]);
+  const router = useRouter();
+  const [projects, setProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) return;
+    else {
+      router.push("/");
+    }
+  }, []);
 
   useEffect(() => {
     if (!addModal) return;
@@ -300,6 +299,7 @@ export default function Home() {
                         onClick={() => {
                           setBotActive(true);
                           setProjectId(val?.project_id);
+                          setProjectName(val?.project_name);
                           setFaqs(val?.faqs?.[0]?.questions || []);
                         }}
                         key={val?.project_id}
@@ -356,6 +356,8 @@ export default function Home() {
           faqs={faqs}
           onClose={() => {
             setBotActive(false);
+            setProjectId("");
+            setProjectName("");
           }}
         />
       ) : (
@@ -369,10 +371,12 @@ const DetailsModal = ({
   projectId,
   faqs,
   onClose,
+  projectName,
 }: {
   projectId: string;
   faqs: string[];
   onClose: () => void;
+  projectName?: string;
 }) => {
   const [selected, setSelected] = useState<string>("playground");
   const [isActivated, setIsActivated] = useState<boolean>(false);
@@ -408,7 +412,7 @@ const DetailsModal = ({
       <div className="bg-black/40 z-[100] w-full h-full blur-sm absolute top-0 left-0"></div>
       <div className="absolute h-[80vh] w-[800px] bg-[#1b1b1b] rounded-md p-[16px] z-[110] shadow-sm border border-gray-700 flex flex-col ">
         <div className="flex justify-between w-full text-white">
-          Buildspace
+          {projectName}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width={16}
