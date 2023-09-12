@@ -20,6 +20,7 @@ body {
 
 .markdownHolder {
   font-size: 14px !important;
+  overflow-x: auto;
 }
 
 .markdownHolder p {

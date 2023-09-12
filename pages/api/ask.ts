@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
     const json = await response.json();
     const embedding = json.data?.[0]?.embedding;
-
+    console.log("Embeddings Generated");
     const { data: chunks, error } = await supabaseClient.rpc(
       "embeddings_search",
       {
@@ -58,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
         match_count: 6,
       }
     );
-    console.log({ chunks });
+    console.log("Response from supabase");
     if (error) {
       console.log({ error, chunks });
       return allowCors(req, new Response("Error", { status: 500 }));
@@ -67,6 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
       .map((chunk: { content: string }) => chunk.content)
       .join("\n")}
       `;
+    console.log("Prompt Generated");
     const stream = chunks?.length
       ? await OpenAIstream(
           prompt,

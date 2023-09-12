@@ -108,6 +108,7 @@ export const OpenAIstream = async (
 };
 
 export const getChatSummary = async (contextText: string) => {
+  console.log(" Generating Summary");
   const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
     method: "POST",
     headers: {
@@ -136,6 +137,7 @@ export const getChatSummary = async (contextText: string) => {
   if (response?.status !== 200) {
     return "";
   }
+  console.log("Summary Generated");
   const json = await response.json();
   const text = json.choices[0].message?.content;
   return text || "";
