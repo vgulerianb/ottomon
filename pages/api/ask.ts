@@ -24,14 +24,22 @@ const handler = async (req: Request): Promise<Response> => {
           content: string;
         }[];
       };
+
+    // Commenting this as this is affecting the performance
+    // const summary = history?.length
+    //   ? await getChatSummary(
+    //       history
+    //         ?.map((val) => {
+    //           return val.content;
+    //         })
+    //         ?.join("\n")
+    //     )
+    //   : "";
+    // add last question and response to the context
     const summary = history?.length
-      ? await getChatSummary(
-          history
-            ?.map((val) => {
-              return val.content;
-            })
-            ?.join("\n")
-        )
+      ? history?.[history?.length - 2]?.content +
+        "\n" +
+        history?.[history?.length - 1]?.content
       : "";
     if (!projectId)
       return allowCors(req, new Response("Error", { status: 500 }));
