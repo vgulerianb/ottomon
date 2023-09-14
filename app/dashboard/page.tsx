@@ -5,14 +5,12 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Loading from "../components/SvgComps/loading";
 import { getGitHubRepoFiles } from "../services/ottomon.service";
-import { Ottomon } from "ottomon";
-import ReactMarkdown from "react-markdown";
-import { RenderCode } from "../components/YoutubeVideoComponent";
+import { AddProjectModel } from "../components/AddProjectModel";
+import { DetailsModal } from "../components/DetailsModal";
 
 export default function Home() {
   const [Email, setEmail] = useState<string>("");
   const [addModal, setAddModal] = useState<boolean>(false);
-  const [website, setWebsite] = useState<string>("Submit");
   const [botActive, setBotActive] = useState<boolean>(false);
   const [faqs, setFaqs] = useState<string[]>([]);
   const [projectId, setProjectId] = useState<string>("");
@@ -125,97 +123,15 @@ export default function Home() {
       )}
       {addModal ? (
         <>
-          <div className="w-screen h-screen fixed top-0 left-0 flex justify-center items-center z-[100]">
-            <div className="w-[700px] bg-black flex flex-col relative  rounded-md border border-gray-700">
-              <div className="p-[8px] text-white border-b border-gray-700">
-                New Project
-              </div>
-              <div className="p-[16px] text-white border-b border-gray-700 flex flex-col">
-                <input
-                  value={projectName}
-                  onChange={(e) => {
-                    setProjectName(e.target.value);
-                  }}
-                  placeholder="Project Name"
-                  className="text-white/70 outline-none w-full border-gray-700 border p-[4px] bg-black text-xs rounded-md"
-                />
-                <span className="text-xs text-white/80 mt-[16px]">
-                  Bot Type
-                </span>
-                <div className="flex gap-[16px]">
-                  <div
-                    onClick={() => {
-                      setProjectType("website");
-                    }}
-                    className={`py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border ${
-                      projectType === "website"
-                        ? "border-white"
-                        : "border-gray-700"
-                    } cursor-pointer`}
-                  >
-                    <img src="/web.png" width={32} height={32} alt="ottomon" />
-                    <span className="text-white/70 text-sm">Website</span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      setProjectType("youtube");
-                    }}
-                    className={`py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border ${
-                      projectType === "youtube"
-                        ? "border-white"
-                        : "border-gray-700"
-                    } cursor-pointer`}
-                  >
-                    <img src="/you.png" width={32} height={32} alt="ottomon" />
-                    <span className="text-white/70 text-sm">Youtube</span>
-                  </div>
-                  <div
-                    onClick={() => {
-                      setProjectType("github");
-                    }}
-                    className={`py-[12px] rounded-md mt-[4px] w-[200px] flex flex-col gap-[8px] items-center border ${
-                      projectType === "github"
-                        ? "border-white"
-                        : "border-gray-700"
-                    } cursor-pointer`}
-                  >
-                    <img src="/you.png" width={32} height={32} alt="ottomon" />
-                    <span className="text-white/70 text-sm">Github</span>
-                  </div>
-                </div>
-                <span className="text-xs text-white/80 mt-[16px] uppercase">
-                  {projectType === "website"
-                    ? "Website Url"
-                    : projectType === "github"
-                    ? "Github repo url"
-                    : "Youtube channel url"}
-                </span>
-                <input
-                  value={url}
-                  onChange={(e) => {
-                    setUrl(e.target.value);
-                  }}
-                  placeholder={
-                    projectType === "website"
-                      ? "https://buildspace.io"
-                      : projectType === "github"
-                      ? "https://github.com/vgulerianb/ottomon"
-                      : "https://youtube.com/channel/83883"
-                  }
-                  className="text-white/70 mt-[4px] outline-none w-full border-gray-700 border p-[4px] bg-black text-xs h-[32px] rounded-md"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    createNewProject();
-                  }}
-                  className={`mt-[16px] w-full text-white h-[40px] bg-gradient-to-br ${"from-purple-600 to-blue-500"}  hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm flex  items-center justify-center text-center mr-2 mb-2`}
-                >
-                  {website}
-                </button>
-              </div>
-            </div>
-          </div>
+          <AddProjectModel
+            createNewProject={createNewProject}
+            projectName={projectName}
+            projectType={projectType}
+            setProjectType={setProjectType}
+            setProjectName={setProjectName}
+            setUrl={setUrl}
+            url={url}
+          />
         </>
       ) : (
         ""
@@ -332,19 +248,6 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
-                {/* {botActive ? (
-                  <Ottomon
-                    faqs={faqs}
-                    projectId={projectId}
-                    onClose={() => {
-                      setBotActive(false);
-                      setProjectId("");
-                      setFaqs([]);
-                    }}
-                  />
-                ) : (
-                  ""
-                )} */}
               </div>
             </div>
           </main>
@@ -366,148 +269,3 @@ export default function Home() {
     </div>
   );
 }
-
-const DetailsModal = ({
-  projectId,
-  faqs,
-  onClose,
-  projectName,
-}: {
-  projectId: string;
-  faqs: string[];
-  onClose: () => void;
-  projectName?: string;
-}) => {
-  const [selected, setSelected] = useState<string>("playground");
-  const [isActivated, setIsActivated] = useState<boolean>(false);
-  const [conversations, setConversations] = useState<any>({});
-
-  useEffect(() => {
-    getConversation();
-  }, [selected]);
-
-  const getConversation = async () => {
-    await axios
-      .get(`/otto-api/conversations?projectId=${projectId}`, {
-        headers: {
-          Authorization: `${localStorage.getItem("token")}`,
-        },
-      })
-      .then((res) => {
-        setConversations(res?.data?.conversation || {});
-      });
-  };
-
-  return (
-    <div className="fixed w-screen h-screen top-0 left-0 overflow-hidden flex justify-center items-center">
-      {isActivated ? (
-        <Ottomon
-          faqs={faqs}
-          projectId={projectId}
-          onClose={() => {
-            setIsActivated(false);
-          }}
-        />
-      ) : null}
-      <div className="bg-black/40 z-[100] w-full h-full blur-sm absolute top-0 left-0"></div>
-      <div className="absolute h-[80vh] w-[800px] bg-[#1b1b1b] rounded-md p-[16px] z-[110] shadow-sm border border-gray-700 flex flex-col ">
-        <div className="flex justify-between w-full text-white">
-          {projectName}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={16}
-            height={16}
-            fill="none"
-            className="cursor-pointer"
-            onClick={() => {
-              onClose();
-            }}
-          >
-            <path
-              fill="#fff"
-              d="M14.704 13.29a1.001 1.001 0 1 1-1.416 1.417L8 9.417l-5.29 5.288a1.002 1.002 0 0 1-1.417-1.416L6.583 8 1.296 2.71A1.001 1.001 0 0 1 2.71 1.294L8 6.584l5.29-5.29a1.001 1.001 0 0 1 1.416 1.415L9.416 8l5.288 5.29Z"
-            />
-          </svg>
-        </div>
-        <div className="flex gap-[8px] mt-[16px]">
-          <div
-            onClick={() => setSelected("playground")}
-            className={`${
-              selected === "playground"
-                ? "bg-black text-white"
-                : "text-gray-400"
-            } cursor-pointer p-[4px] rounded-md w-[150px] border border-gray-700`}
-          >
-            Playground
-          </div>
-          <div
-            onClick={() => setSelected("conversations")}
-            className={`${
-              selected === "conversations"
-                ? "bg-black text-white"
-                : "text-gray-400"
-            } cursor-pointer p-[4px] rounded-md w-[150px] border border-gray-700`}
-          >
-            Conversations
-          </div>
-        </div>
-        {selected === "playground" ? (
-          <div className="flex flex-col overflow-scroll">
-            <span className="text-xs mt-[16px] flex justify-between items-center">
-              {/* Add instructions to use below code */}
-              Use below code to add ottomon to your website
-              <button
-                onClick={() => {
-                  setIsActivated(true);
-                }}
-                className="h-[32px] rounded-md text-sm font-semibold whitespace-nowrap p-[8px] outline-none text-black bg-white"
-              >
-                Try it out
-              </button>
-            </span>
-            <ReactMarkdown
-              className={`markdownHolder mt-0`}
-              children={` \`\`\`
-import { useState } from "react";
-import { Ottomon } from "ottomon";
-
-const MyOttomonBot = () => {
-  const [botActive, setBotActive] = useState<boolean>(false);
-
-  return <>
-    {botActive?<Ottomon 
-      onClose={() => {
-        setBotActive(false);
-      }}
-      projectId="${projectId}" 
-      faqs={${JSON.stringify(faqs, undefined, 2)}} />:null}
-      <button
-        onClick={() => {
-          setBotActive(true);
-        }}
-      >Open Bot</button>
-  </>
-}
-            `}
-              components={{
-                pre: (props: any) => <RenderCode {...props} />,
-              }}
-            />
-          </div>
-        ) : (
-          <div className="flex flex-col gap-[8px] mt-[16px] overflow-scroll">
-            {(Object.entries(conversations) as any).map(([key, val]) => (
-              <div
-                key={key}
-                className=" p-[16px] w-full rounded-md border border-gray-700 hover:border-white cursor-pointer bg-black"
-              >
-                {val?.length} messages on{" "}
-                {new Date(val?.[0]?.created_at).toLocaleDateString()}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
